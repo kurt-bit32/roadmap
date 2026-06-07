@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hardware Attack Deep Dive</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Bebas+Neue&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080b10;
+  --surface: #0d1117;
+  --surface2: #111820;
+  --border: #1c2a3a;
+  --border2: #243344;
+  --blue: #4fc3f7;
+  --blue-glow: rgba(79,195,247,0.2);
+  --orange: #ff7043;
+  --orange-glow: rgba(255,112,67,0.2);
+  --purple: #ce93d8;
+  --purple-glow: rgba(206,147,216,0.2);
+  --green: #69f0ae;
+  --green-glow: rgba(105,240,174,0.15);
+  --yellow: #ffee58;
+  --text: #b0bec5;
+  --text-bright: #eceff1;
+  --muted: #546e7a;
+  --code-bg: #050810;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Barlow', sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* Noise texture */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0.4;
+}
+
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  min-width: 220px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 32px 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-brand {
+  padding: 0 20px 28px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.sidebar-brand-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 3px;
+  margin-bottom: 6px;
+}
+
+.sidebar-brand-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  color: var(--blue);
+  letter-spacing: 2px;
+  line-height: 1.1;
+  text-shadow: 0 0 20px var(--blue-glow);
+}
+
+.nav-section {
+  padding: 0 12px;
+  margin-bottom: 8px;
+}
+
+.nav-section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  padding: 0 8px;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+  margin-bottom: 2px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.nav-item:hover {
+  color: var(--text-bright);
+  background: rgba(255,255,255,0.04);
+}
+
+.nav-item.active {
+  color: var(--item-color, var(--blue));
+  background: rgba(79,195,247,0.08);
+  border-color: rgba(79,195,247,0.15);
+}
+
+.nav-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--item-color, var(--blue));
+  flex-shrink: 0;
+  opacity: 0.5;
+  transition: opacity 0.2s, box-shadow 0.2s;
+}
+
+.nav-item.active .nav-dot {
+  opacity: 1;
+  box-shadow: 0 0 8px var(--item-color, var(--blue));
+}
+
+/* Main content */
+.main {
+  flex: 1;
+  overflow-x: hidden;
+}
+
+/* Hero */
+.hero {
+  padding: 60px 48px 50px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, var(--surface) 0%, var(--bg) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: 'HARDWARE\AATTACK\AANALYSIS';
+  position: absolute;
+  right: -20px;
+  top: -20px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 120px;
+  color: rgba(79,195,247,0.03);
+  line-height: 0.9;
+  white-space: pre;
+  letter-spacing: 4px;
+  pointer-events: none;
+}
+
+.hero-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--blue);
+  letter-spacing: 4px;
+  margin-bottom: 16px;
+  opacity: 0.7;
+}
+
+.hero-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(40px, 6vw, 72px);
+  color: var(--text-bright);
+  letter-spacing: 3px;
+  line-height: 1;
+  margin-bottom: 16px;
+}
+
+.hero-title span { color: var(--blue); }
+
+.hero-sub {
+  font-size: 15px;
+  color: var(--muted);
+  max-width: 500px;
+  font-weight: 300;
+}
+
+.hero-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 4px 12px;
+  border-radius: 2px;
+  border: 1px solid;
+  letter-spacing: 1px;
+}
+
+.tag-blue { color: var(--blue); border-color: rgba(79,195,247,0.3); background: rgba(79,195,247,0.06); }
+.tag-orange { color: var(--orange); border-color: rgba(255,112,67,0.3); background: rgba(255,112,67,0.06); }
+.tag-purple { color: var(--purple); border-color: rgba(206,147,216,0.3); background: rgba(206,147,216,0.06); }
+
+/* Content sections */
+.content {
+  padding: 0 48px 80px;
+}
+
+.section {
+  padding-top: 56px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 56px;
+}
+
+.section:last-child { border-bottom: none; }
+
+.section-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 36px;
+}
+
+.section-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 64px;
+  line-height: 1;
+  color: var(--section-color, var(--blue));
+  opacity: 0.15;
+  min-width: 60px;
+  margin-top: -8px;
+}
+
+.section-title-block {}
+
+.section-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 3px;
+  margin-bottom: 6px;
+}
+
+.section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px;
+  color: var(--section-color, var(--blue));
+  letter-spacing: 2px;
+  text-shadow: 0 0 30px var(--section-glow, var(--blue-glow));
+  line-height: 1;
+}
+
+.section-desc {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--muted);
+  max-width: 560px;
+  font-weight: 300;
+}
+
+/* Step flow */
+.step-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 28px 0;
+}
+
+.step {
+  display: flex;
+  gap: 0;
+  position: relative;
+}
+
+.step-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 48px;
+  flex-shrink: 0;
+}
+
+.step-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--step-color, var(--blue));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--step-color, var(--blue));
+  background: var(--bg);
+  flex-shrink: 0;
+  z-index: 1;
+  box-shadow: 0 0 12px var(--step-glow, var(--blue-glow));
+}
+
+.step-line {
+  width: 2px;
+  flex: 1;
+  background: var(--border);
+  min-height: 20px;
+}
+
+.step:last-child .step-line { display: none; }
+
+.step-content {
+  padding: 4px 0 28px 20px;
+  flex: 1;
+}
+
+.step-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-bright);
+  margin-bottom: 6px;
+}
+
+.step-body {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.65;
+  font-weight: 300;
+}
+
+/* Code blocks */
+.code-block {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--cb-color, var(--blue));
+  border-radius: 4px;
+  padding: 16px 20px;
+  margin: 12px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.8;
+  overflow-x: auto;
+}
+
+.code-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 3px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.c-cmd { color: var(--blue); }
+.c-comment { color: var(--muted); }
+.c-string { color: var(--green); }
+.c-flag { color: var(--yellow); }
+.c-output { color: var(--orange); }
+.c-path { color: var(--purple); }
+
+/* Info cards */
+.card-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 16px;
+  border-top: 2px solid var(--card-color, var(--blue));
+}
+
+.card-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--card-color, var(--blue));
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.card-body {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.55;
+  font-weight: 300;
+}
+
+/* Alert box */
+.alert {
+  border: 1px solid;
+  border-radius: 4px;
+  padding: 14px 18px;
+  margin: 16px 0;
+  font-size: 13px;
+  line-height: 1.6;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.alert-icon {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+  letter-spacing: 1px;
+}
+
+.alert-tip { border-color: rgba(105,240,174,0.2); background: rgba(105,240,174,0.05); color: var(--green); }
+.alert-warn { border-color: rgba(255,238,88,0.2); background: rgba(255,238,88,0.05); color: var(--yellow); }
+.alert-attack { border-color: rgba(255,112,67,0.2); background: rgba(255,112,67,0.05); color: var(--orange); }
+
+/* Pin diagram */
+.pin-diagram {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 20px;
+  margin: 16px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+}
+
+.pin-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.pin-row:last-child { border-bottom: none; }
+
+.pin-num { color: var(--muted); min-width: 30px; }
+.pin-name { min-width: 60px; }
+.pin-tx { color: var(--blue); }
+.pin-rx { color: var(--green); }
+.pin-gnd { color: var(--orange); }
+.pin-vcc { color: var(--yellow); }
+.pin-desc { color: var(--muted); font-size: 11px; }
+
+/* Frequency table */
+.freq-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin: 16px 0;
+}
+
+.freq-table th {
+  text-align: left;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  border-bottom: 1px solid var(--border);
+  padding: 8px 12px;
+  font-weight: 400;
+}
+
+.freq-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(28,42,58,0.5);
+  vertical-align: top;
+}
+
+.freq-table tr:last-child td { border-bottom: none; }
+
+.freq-mhz { font-family: 'JetBrains Mono', monospace; color: var(--purple); font-size: 12px; }
+.freq-use { color: var(--text-bright); font-weight: 500; }
+.freq-note { color: var(--muted); font-size: 12px; font-weight: 300; }
+.freq-risk { font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+.risk-high { color: var(--orange); }
+.risk-med { color: var(--yellow); }
+.risk-low { color: var(--green); }
+
+/* Divider */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, var(--border), transparent);
+  margin: 24px 0;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+@media (max-width: 700px) {
+  .layout { flex-direction: column; }
+  .sidebar { width: 100%; min-width: unset; height: auto; position: static; flex-direction: row; flex-wrap: wrap; padding: 16px; gap: 8px; }
+  .sidebar-brand { padding: 0; border: none; margin: 0; }
+  .nav-section { padding: 0; }
+  .hero, .content { padding-left: 20px; padding-right: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-brand-label">// DEEP DIVE</div>
+    <div class="sidebar-brand-title">HARDWARE<br>ATTACKS</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Modules</div>
+    <div class="nav-item active" style="--item-color:#4fc3f7" onclick="scrollTo('uart')">
+      <div class="nav-dot" style="--item-color:#4fc3f7"></div>
+      UART Attacks
+    </div>
+    <div class="nav-item" style="--item-color:#ff7043" onclick="scrollTo('firmware')">
+      <div class="nav-dot" style="--item-color:#ff7043"></div>
+      Firmware Extraction
+    </div>
+    <div class="nav-item" style="--item-color:#ce93d8" onclick="scrollTo('wireless')">
+      <div class="nav-dot" style="--item-color:#ce93d8"></div>
+      Wireless Hacking
+    </div>
+    <div class="nav-item" style="--item-color:#69f0ae" onclick="scrollTo('resources')">
+      <div class="nav-dot" style="--item-color:#69f0ae"></div>
+      Resources
+    </div>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+  <div class="hero">
+    <div class="hero-eyebrow">// HARDWARE ATTACK VECTORS</div>
+    <div class="hero-title">THREE <span>ATTACKS</span><br>EXPLAINED</div>
+    <div class="hero-sub">Practical deep dives into UART exploitation, firmware analysis, and wireless hardware attacks. Real commands, real targets.</div>
+    <div class="hero-tags">
+      <span class="tag tag-blue">UART / Serial</span>
+      <span class="tag tag-orange">Firmware RE</span>
+      <span class="tag tag-purple">RF / Wireless</span>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ======================== UART ======================== -->
+    <div class="section" id="uart" style="--section-color:#4fc3f7; --section-glow:rgba(79,195,247,0.2)">
+      <div class="section-header">
+        <div class="section-num">01</div>
+        <div class="section-title-block">
+          <div class="section-eyebrow">// SERIAL DEBUG EXPLOITATION</div>
+          <div class="section-title">UART ATTACKS</div>
+          <div class="section-desc">Universal Asynchronous Receiver-Transmitter — the most common hardware attack vector. Many devices leave debug consoles wide open.</div>
+        </div>
+      </div>
+
+      <div class="code-label">// What is UART?</div>
+      <div style="font-size:14px; color:var(--text); margin-bottom:20px; font-weight:300; line-height:1.7;">
+        UART is a simple serial communication protocol — just 2 wires (TX and RX) plus ground. Manufacturers use it for debug output during development, and often forget to disable it in production firmware. Finding it = free shell access on many devices.
+      </div>
+
+      <div class="card-row">
+        <div class="card" style="--card-color:#4fc3f7">
+          <div class="card-title">TX (Transmit)</div>
+          <div class="card-body">Device sends data out. Connect to RX on your adapter.</div>
+        </div>
+        <div class="card" style="--card-color:#69f0ae">
+          <div class="card-title">RX (Receive)</div>
+          <div class="card-body">Device receives data in. Connect to TX on your adapter.</div>
+        </div>
+        <div class="card" style="--card-color:#ff7043">
+          <div class="card-title">GND (Ground)</div>
+          <div class="card-body">Common ground. Always connect this first.</div>
+        </div>
+        <div class="card" style="--card-color:#ffee58">
+          <div class="card-title">VCC (Optional)</div>
+          <div class="card-body">Power. Usually DON'T connect — device is already powered.</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="code-label">// Step-by-Step Attack Process</div>
+      <div class="step-flow">
+        <div class="step">
+          <div class="step-left">
+            <div class="step-circle" style="--step-color:#4fc3f7; --step-glow:rgba(79,195,247,0.2)">1</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-content">
+            <div class="step-title">Visual inspection — find test points</div>
+            <div class="step-body">Look for a row of 3–4 through-hole pads or unpopulated headers on the PCB. Often labeled "J1", "DEBUG", "UART", or "CON". Sometimes just bare solder pads. Use good lighting and magnification.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-left">
+            <div class="step-circle" style="--step-color:#4fc3f7; --step-glow:rgba(79,195,247,0.2)">2</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-content">
+            <div class="step-title">Identify pins with a multimeter</div>
+            <div class="step-body">
+              GND: continuity to metal shielding or known ground.<br>
+              VCC: ~3.3V or 5V when device is powered.<br>
+              TX: fluctuates ~0–3.3V during boot (sends data).<br>
+              RX: usually stays high (~3.3V) when idle.
+            </div>
+            <div class="pin-diagram" style="margin-top:10px;">
+              <div class="pin-row"><span class="pin-num">P1</span><span class="pin-name pin-gnd">GND</span><span class="pin-desc">0V — continuity to chassis</span></div>
+              <div class="pin-row"><span class="pin-num">P2</span><span class="pin-name pin-vcc">VCC</span><span class="pin-desc">3.3V — steady high</span></div>
+              <div class="pin-row"><span class="pin-num">P3</span><span class="pin-name pin-tx">TX</span><span class="pin-desc">Voltage fluctuates on boot</span></div>
+              <div class="pin-row"><span class="pin-num">P4</span><span class="pin-name pin-rx">RX</span><span class="pin-desc">High when idle (~3.3V)</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-left">
+            <div class="step-circle" style="--step-color:#4fc3f7; --step-glow:rgba(79,195,247,0.2)">3</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-content">
+            <div class="step-title">Find the baud rate</div>
+            <div class="step-body">Connect your logic analyzer to the TX pin and capture boot output. Use a logic analyzer software like PulseView or Saleae Logic. Common rates to try: 115200, 9600, 57600, 38400. Or just brute-force it.</div>
+            <div class="code-block" style="--cb-color:#4fc3f7">
+              <div class="c-comment"># Common baud rates to try (most devices use 115200)</div>
+              <span class="c-cmd">baudrate_list</span> = [115200, 9600, 57600, 38400, 19200, 4800]<br><br>
+              <div class="c-comment"># With a logic analyzer in PulseView:</div>
+              <div class="c-comment"># Decoder → UART → set baud rate → observe output</div>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-left">
+            <div class="step-circle" style="--step-color:#4fc3f7; --step-glow:rgba(79,195,247,0.2)">4</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-content">
+            <div class="step-title">Connect USB-UART adapter & open terminal</div>
+            <div class="step-body">Wire: Device TX → Adapter RX, Device RX → Adapter TX, Device GND → Adapter GND. Then open a serial terminal.</div>
+            <div class="code-block" style="--cb-color:#4fc3f7">
+              <div class="c-comment"># Linux — find your adapter</div>
+              <span class="c-cmd">ls</span> <span class="c-path">/dev/ttyUSB*</span>   <span class="c-comment"># CH340 / CP2102</span><br>
+              <span class="c-cmd">ls</span> <span class="c-path">/dev/ttyACM*</span>   <span class="c-comment"># Arduino</span><br><br>
+              <div class="c-comment"># Open serial console (replace 115200 with your baud rate)</div>
+              <span class="c-cmd">screen</span> <span class="c-path">/dev/ttyUSB0</span> <span class="c-flag">115200</span><br>
+              <span class="c-comment"># or</span><br>
+              <span class="c-cmd">minicom</span> <span class="c-flag">-D /dev/ttyUSB0 -b 115200</span><br>
+              <span class="c-comment"># or</span><br>
+              <span class="c-cmd">picocom</span> <span class="c-flag">-b 115200</span> <span class="c-path">/dev/ttyUSB0</span>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-left">
+            <div class="step-circle" style="--step-color:#4fc3f7; --step-glow:rgba(79,195,247,0.2)">5</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-content">
+            <div class="step-title">Get your shell — exploit it</div>
+            <div class="step-body">Reboot the device. Watch boot logs scroll. Many devices drop straight into a root shell. Others show a U-Boot bootloader prompt — that's even better.</div>
+            <div class="code-block" style="--cb-color:#69f0ae">
+              <div class="c-comment"># Common things you'll see</div>
+              <span class="c-output">BusyBox v1.26.2 built-in shell (ash)</span><br>
+              <span class="c-output">Enter 'help' for a list of built-in commands.</span><br><br>
+              <span class="c-output"># ← ROOT SHELL. You win.</span><br><br>
+              <div class="c-comment"># If U-Boot prompt appears:</div>
+              <span class="c-output">Hit any key to stop autoboot: 3</span><br>
+              <span class="c-comment"># Press a key fast! Then:</span><br>
+              <span class="c-cmd">printenv</span>   <span class="c-comment"># dump all env vars</span><br>
+              <span class="c-cmd">run</span> <span class="c-flag">bootargs</span>  <span class="c-comment"># see kernel args</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert-attack">
+        <div class="alert-icon">⚡ REAL</div>
+        <div>TP-Link, D-Link, Netgear, and tons of cheap IP cameras all have exposed UART debug ports. Search "[router model] UART pinout" and someone's probably already mapped the pins. You just need to connect and reboot.</div>
+      </div>
+
+      <div class="alert alert-tip">
+        <div class="alert-icon">✓ TIP</div>
+        <div>If the device has no UART debug shell but has U-Boot, you can often modify the bootargs to boot into single-user mode or disable root password check entirely.</div>
+      </div>
+    </div>
+
+    <!-- ======================== FIRMWARE ======================== -->
+    <div class="section" id="firmware" style="--section-color:#ff7043; --section-glow:rgba(255,112,67,0.2)">
+      <div class="section-header">
+        <div class="section-num">02</div>
+        <div class="section-title-block">
+          <div class="section-eyebrow">// BINARY ANALYSIS & EXTRACTION</div>
+          <div class="section-title">FIRMWARE EXTRACTION</div>
+          <div class="section-desc">Pull the firmware from flash chips or download it from the vendor. Then tear it apart to find hardcoded creds, vulnerabilities, and secrets.</div>
+        </div>
+      </div>
+
+      <div class="code-label">// Two Ways to Get Firmware</div>
+      <div class="card-row">
+        <div class="card" style="--card-color:#ff7043">
+          <div class="card-title">Method A — Download (Easy)</div>
+          <div class="card-body">Most vendors post firmware update files on their website. Download, rename to .bin, and start analyzing. No hardware needed.</div>
+        </div>
+        <div class="card" style="--card-color:#ffee58">
+          <div class="card-title">Method B — Extract from Flash Chip</div>
+          <div class="card-body">When no update available or firmware is encrypted. Use SPI clip + Bus Pirate / Raspberry Pi to dump the flash chip directly.</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="code-label">// Method A — Analyze Downloaded Firmware</div>
+      <div class="step-flow">
+        <div class="step">
+          <div class="step-left">
+            <div class="step-circle" style="--step-color:#ff7043; --step-glow:rgba(255,112,67,0.2)">1</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-content">
+            <div class="step-title">Initial recon with binwalk</div>
+            <div class="step-body">Binwalk scans the binary for known file signatures and compression headers.</div>
+            <div class="code-block" style="--cb-color:#ff7043">
+              <div class="c-comment"># Scan — see what's inside</div>
+              <span class="c-cmd">binwalk</span> firmware.bin<br><br>
+              <span class="c-output">DECIMAL    HEX       DESCRIPTION</span><br>
+              <span class="c-output">0          0x0       LZMA compressed data</span><br>
+              <span class="c-output">1835008    0x1C0000  Squashfs filesystem, little endian</span><br>
+              <span class="c-output">6815744    0x680000  JFFS2 filesystem data</span><br><br>
+              <div class="c-comment"># Extract everything</div>
+              <span class="c-cmd">binwalk</span> <span class="c-flag">-e --run-as=root</span> firmware.bin<br>
+              <span class="c-cmd">cd</span> <span class="c-path">_firmware.bin.extracted/</span>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-left">
+            <div class="step-circle" style="--step-color:#ff7043; --step-glow:rgba(255,112,67,0.2)">2</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-content">
+            <div class="step-title">Explore the filesystem</div>
+            <div class="step-body">You'll usually find a full Linux filesystem — /etc, /bin, /var, everything. Start looking for credentials and config files.</div>
+            <div class="code-block" style="--cb-color:#ff7043">
+              <div class="c-comment"># Hunt for passwords</div>
+              <span class="c-cmd">cat</span> <span class="c-path">squashfs-root/etc/passwd</span><br>
+              <span class="c-cmd">cat</span> <span class="c-path">squashfs-root/etc/shadow</span><br><br>
+              <div class="c-comment"># Find hardcoded credentials</div>
+              <span class="c-cmd">grep</span> <span class="c-flag">-r</span> <span class="c-string">"password"</span> squashfs-root/ <span class="c-flag">2>/dev/null</span><br>
+              <span class="c-cmd">grep</span> <span class="c-flag">-r</span> <span class="c-string">"admin"</span> squashfs-root/etc/ <span class="c-flag">2>/dev/null</span><br>
+              <span class="c-cmd">grep</span> <span class="c-flag">-r</span> <span class="c-string">"secret"</span> squashfs-root/ <span class="c-flag">2>/dev/null</span><br><br>
+              <div class="c-comment"># Find all binaries (for later RE)</div>
+              <span class="c-cmd">find</span> squashfs-root/ <span class="c-flag">-type f -executable</span> <span class="c-flag">| head -30</span>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-left">
+            <div class="step-circle" style="--step-color:#ff7043; --step-glow:rgba(255,112,67,0.2)">3</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-content">
+            <div class="step-title">Strings analysis on binaries</div>
+            <div class="step-body">Even compiled binaries leak info through embedded strings — URLs, API keys, debug messages, credentials.</div>
+            <div class="code-block" style="--cb-color:#ff7043">
+              <div class="c-comment"># Dump strings from a binary</div>
+              <span class="c-cmd">strings</span> squashfs-root/bin/httpd <span class="c-flag">| grep -i</span> <span class="c-string">"pass\|key\|secret\|token\|auth"</span><br><br>
+              <div class="c-comment"># Check file type before RE</div>
+              <span class="c-cmd">file</span> squashfs-root/bin/httpd<br>
+              <span class="c-output">httpd: ELF 32-bit LSB executable, MIPS</span><br><br>
+              <div class="c-comment"># Check for crypto keys, entropy spikes</div>
+              <span class="c-cmd">binwalk</span> <span class="c-flag">-E</span> squashfs-root/bin/httpd  <span class="c-comment"># entropy graph</span>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-left">
+            <div class="step-circle" style="--step-color:#ff7043; --step-glow:rgba(255,112,67,0.2)">4</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-content">
+            <div class="step-title">Reverse engineer with Ghidra</div>
+            <div class="step-body">Load the main binary into Ghidra. It decompiles MIPS/ARM/x86 to readable C-like pseudocode. Look for auth functions, strcmp calls, hardcoded keys.</div>
+            <div class="code-block" style="--cb-color:#ff7043">
+              <div class="c-comment"># Install Ghidra (already on Kali)</div>
+              <span class="c-cmd">ghidra</span><br><br>
+              <div class="c-comment"># In Ghidra:</div>
+              <div class="c-comment"># 1. New Project → Import firmware binary</div>
+              <div class="c-comment"># 2. Auto-analyze (let it run)</div>
+              <div class="c-comment"># 3. Symbol Tree → Functions → search "auth" / "login"</div>
+              <div class="c-comment"># 4. Look for strcmp() with hardcoded strings</div>
+              <div class="c-comment"># 5. Decompiler window shows C-like pseudocode</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="code-label">// Method B — Physical Flash Chip Extraction</div>
+      <div class="step-flow">
+        <div class="step">
+          <div class="step-left">
+            <div class="step-circle" style="--step-color:#ffee58; --step-glow:rgba(255,238,88,0.2)">1</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-content">
+            <div class="step-title">Identify the flash chip</div>
+            <div class="step-body">Look for a small 8-pin IC on the PCB, usually labeled with a part number like W25Q64, MX25L6406, or GD25Q64. Google the datasheet.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-left">
+            <div class="step-circle" style="--step-color:#ffee58; --step-glow:rgba(255,238,88,0.2)">2</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-content">
+            <div class="step-title">Clip on and dump with flashrom</div>
+            <div class="step-body">Use an SPI clip (SOIC-8 clip) to connect to the chip without desoldering. Power the clip from your Pi/Bus Pirate, not the device.</div>
+            <div class="code-block" style="--cb-color:#ffee58">
+              <div class="c-comment"># Raspberry Pi as SPI programmer</div>
+              <span class="c-cmd">flashrom</span> <span class="c-flag">-p linux_spi:dev=/dev/spidev0.0,spispeed=1000</span> <span class="c-flag">-r</span> dump.bin<br><br>
+              <div class="c-comment"># Bus Pirate</div>
+              <span class="c-cmd">flashrom</span> <span class="c-flag">-p buspirate_spi:dev=/dev/ttyUSB0,spispeed=1M</span> <span class="c-flag">-r</span> dump.bin<br><br>
+              <div class="c-comment"># Verify dump</div>
+              <span class="c-cmd">binwalk</span> dump.bin
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert-tip">
+        <div class="alert-icon">✓ TIP</div>
+        <div>Always start with Method A — download from vendor site. Use <code style="font-family:JetBrains Mono;font-size:11px;">firmwalker</code> after extraction — it auto-hunts for credentials, private keys, SSL certs, and web server configs across the entire filesystem.</div>
+      </div>
+
+      <div class="alert alert-warn">
+        <div class="alert-icon">! TOOL</div>
+        <div>Install EMBA (Embedded Analyzer) — it automates a ton of firmware analysis: CVE lookup for detected packages, hardcoded creds, outdated libraries, config file auditing. Like running an automated pentest on firmware.</div>
+      </div>
+    </div>
+
+    <!-- ======================== WIRELESS ======================== -->
+    <div class="section" id="wireless" style="--section-color:#ce93d8; --section-glow:rgba(206,147,216,0.2)">
+      <div class="section-header">
+        <div class="section-num">03</div>
+        <div class="section-title-block">
+          <div class="section-eyebrow">// RF / SDR / PROTOCOL ATTACKS</div>
+          <div class="section-title">WIRELESS HARDWARE HACKING</div>
+          <div class="section-desc">Everything talks wirelessly. Most of it isn't encrypted or authenticated properly. SDR lets you listen to, analyze, and replay radio signals.</div>
+        </div>
+      </div>
+
+      <div class="code-label">// Common Wireless Attack Surfaces</div>
+      <table class="freq-table">
+        <tr>
+          <th>FREQUENCY</th>
+          <th>USED FOR</th>
+          <th>ATTACK TYPE</th>
+          <th>RISK</th>
+        </tr>
+        <tr>
+          <td><span class="freq-mhz">315 / 433 MHz</span></td>
+          <td><span class="freq-use">Car remotes, garage doors, cheap IoT sensors</span></td>
+          <td class="freq-note">Replay attack — record signal, replay to unlock</td>
+          <td><span class="freq-risk risk-high">HIGH</span></td>
+        </tr>
+        <tr>
+          <td><span class="freq-mhz">868 / 915 MHz</span></td>
+          <td><span class="freq-use">Zigbee, Z-Wave, smart meters, LoRa</span></td>
+          <td class="freq-note">Sniff unencrypted comms, inject commands</td>
+          <td><span class="freq-risk risk-high">HIGH</span></td>
+        </tr>
+        <tr>
+          <td><span class="freq-mhz">2.4 GHz</span></td>
+          <td><span class="freq-use">WiFi, Bluetooth, Zigbee, drones, mice</span></td>
+          <td class="freq-note">MouseJack, BLE sniffing, WiFi deauth</td>
+          <td><span class="freq-risk risk-high">HIGH</span></td>
+        </tr>
+        <tr>
+          <td><span class="freq-mhz">13.56 MHz</span></td>
+          <td><span class="freq-use">NFC, RFID access cards, transit cards</span></td>
+          <td class="freq-note">Card cloning, relay attacks, replay</td>
+          <td><span class="freq-risk risk-med">MED</span></td>
+        </tr>
+        <tr>
+          <td><span class="freq-mhz">125 kHz</span></td>
+          <td><span class="freq-use">Old access cards (HID Prox, EM4100)</span></td>
+          <td class="freq-note">Trivially cloneable — no encryption at all</td>
+          <td><span class="freq-risk risk-high">HIGH</span></td>
+        </tr>
+        <tr>
+          <td><span class="freq-mhz">1090 MHz</span></td>
+          <td><span class="freq-use">ADS-B airplane tracking</span></td>
+          <td class="freq-note">Passive listening (great SDR starter)</td>
+          <td><span class="freq-risk risk-low">SAFE</span></td>
+        </tr>
+      </table>
+
+      <div class="divider"></div>
+
+      <div class="code-label">// Attack 1 — Replay Attack (433 MHz)</div>
+      <div class="step-flow">
+        <div class="step">
+          <div class="step-left">
+            <div class="step-circle" style="--step-color:#ce93d8; --step-glow:rgba(206,147,216,0.2)">1</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-content">
+            <div class="step-title">Capture the signal with RTL-SDR</div>
+            <div class="step-body">Point your antenna at a 433 MHz remote (garage door, wireless doorbell, cheap sensor). Capture the raw RF signal.</div>
+            <div class="code-block" style="--cb-color:#ce93d8">
+              <div class="c-comment"># Install rtl-sdr tools</div>
+              <span class="c-cmd">sudo apt install</span> rtl-sdr sox<br><br>
+              <div class="c-comment"># Capture 433 MHz signal (press the remote while recording)</div>
+              <span class="c-cmd">rtl_sdr</span> <span class="c-flag">-f 433920000 -s 2000000 -g 40</span> capture.cu8<br><br>
+              <div class="c-comment"># Or use URH (Universal Radio Hacker) — GUI tool</div>
+              <span class="c-cmd">pip install</span> urh<br>
+              <span class="c-cmd">urh</span>   <span class="c-comment"># opens GUI, record → analyze → replay</span>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-left">
+            <div class="step-circle" style="--step-color:#ce93d8; --step-glow:rgba(206,147,216,0.2)">2</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-content">
+            <div class="step-title">Decode and analyze with URH or rtl_433</div>
+            <div class="step-body">Identify the modulation (ASK/OOK is most common for 433 MHz), decode the bits, and understand the packet structure.</div>
+            <div class="code-block" style="--cb-color:#ce93d8">
+              <div class="c-comment"># rtl_433 auto-decodes hundreds of 433 MHz devices</div>
+              <span class="c-cmd">rtl_433</span>   <span class="c-comment"># listen live and auto-decode</span><br>
+              <span class="c-cmd">rtl_433</span> <span class="c-flag">-r</span> capture.cu8  <span class="c-comment"># decode from file</span><br><br>
+              <span class="c-output">time      : 2024-01-15 14:32:01</span><br>
+              <span class="c-output">model     : Generic-Remote</span><br>
+              <span class="c-output">id        : 0xA3</span><br>
+              <span class="c-output">channel   : 1</span><br>
+              <span class="c-output">button    : A</span>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-left">
+            <div class="step-circle" style="--step-color:#ce93d8; --step-glow:rgba(206,147,216,0.2)">3</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-content">
+            <div class="step-title">Replay with HackRF or Flipper Zero</div>
+            <div class="step-body">To transmit you need HackRF (or a cheap clone), a 433 MHz TX module (~$2), or a Flipper Zero. Replaying a raw capture is trivial.</div>
+            <div class="code-block" style="--cb-color:#ce93d8">
+              <div class="c-comment"># Replay with HackRF One</div>
+              <span class="c-cmd">hackrf_transfer</span> <span class="c-flag">-t capture.cu8 -f 433920000 -s 2000000 -x 40</span><br><br>
+              <div class="c-comment"># Flipper Zero — Sub-GHz app</div>
+              <div class="c-comment"># Read → save → transmit. Done. GUI does it all.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="code-label">// Attack 2 — BLE (Bluetooth Low Energy) Sniffing</div>
+      <div class="step-flow">
+        <div class="step">
+          <div class="step-left">
+            <div class="step-circle" style="--step-color:#ce93d8; --step-glow:rgba(206,147,216,0.2)">A</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-content">
+            <div class="step-title">Enumerate nearby BLE devices</div>
+            <div class="code-block" style="--cb-color:#ce93d8">
+              <div class="c-comment"># Scan for BLE devices</div>
+              <span class="c-cmd">sudo hcitool lescan</span><br>
+              <span class="c-output">LE Scan ...</span><br>
+              <span class="c-output">AA:BB:CC:DD:EE:FF  SmartLock-Pro</span><br>
+              <span class="c-output">11:22:33:44:55:66  FitBand-X3</span><br><br>
+              <div class="c-comment"># Enumerate GATT services/characteristics</div>
+              <span class="c-cmd">gatttool</span> <span class="c-flag">-b AA:BB:CC:DD:EE:FF -I</span><br>
+              <span class="c-output">[AA:BB:CC:DD:EE:FF][LE]></span> <span class="c-cmd">primary</span><br>
+              <span class="c-output">[AA:BB:CC:DD:EE:FF][LE]></span> <span class="c-cmd">char-read-hnd 0x0025</span>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-left">
+            <div class="step-circle" style="--step-color:#ce93d8; --step-glow:rgba(206,147,216,0.2)">B</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-content">
+            <div class="step-title">Sniff with Wireshark + nRF Sniffer</div>
+            <div class="step-body">An nRF52840 dongle (~$10) + Wireshark can capture full BLE traffic between a phone and a smart device. Look for cleartext commands.</div>
+            <div class="code-block" style="--cb-color:#ce93d8">
+              <div class="c-comment"># With Wireshark + nRF Sniffer plugin</div>
+              <div class="c-comment"># Filter: btle.advertising_header.pdu_type == 0x00</div>
+              <div class="c-comment"># Look for ATT Write Commands (handle 0x00XX, value = command)</div><br>
+              <div class="c-comment"># Use bettercap for active BLE attacks</div>
+              <span class="c-cmd">sudo bettercap</span><br>
+              <span class="c-output">»</span> <span class="c-cmd">ble.recon on</span><br>
+              <span class="c-output">»</span> <span class="c-cmd">ble.show</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="code-label">// Attack 3 — RFID / NFC Card Cloning</div>
+      <div class="step-flow">
+        <div class="step">
+          <div class="step-left">
+            <div class="step-circle" style="--step-color:#ce93d8; --step-glow:rgba(206,147,216,0.2)">I</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-content">
+            <div class="step-title">Read the card with Proxmark3 or Flipper Zero</div>
+            <div class="code-block" style="--cb-color:#ce93d8">
+              <div class="c-comment"># Proxmark3 — detect card type</div>
+              <span class="c-cmd">pm3 --</span> <span class="c-flag">-c</span> <span class="c-string">"auto"</span><br><br>
+              <div class="c-comment"># 125 kHz (EM4100) — trivially cloneable</div>
+              <span class="c-cmd">pm3 --</span> <span class="c-flag">-c</span> <span class="c-string">"lf em 410x reader"</span><br>
+              <span class="c-output">EM 410x ID: 1234567890</span><br><br>
+              <div class="c-comment"># Write to blank T5577 card</div>
+              <span class="c-cmd">pm3 --</span> <span class="c-flag">-c</span> <span class="c-string">"lf em 410x clone --id 1234567890"</span><br><br>
+              <div class="c-comment"># Flipper Zero — even easier</div>
+              <div class="c-comment"># RFID app → Read → Save → Write to blank card</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert-attack">
+        <div class="alert-icon">⚡ REAL</div>
+        <div>125 kHz cards (used in many office buildings, parking garages) have ZERO encryption. Read them from up to 10cm away with a hidden reader. This is why modern buildings upgrade to MIFARE or DESFire cards — those are much harder to clone.</div>
+      </div>
+
+      <div class="alert alert-warn">
+        <div class="alert-icon">! LAW</div>
+        <div>Only do RF attacks on your own devices or with explicit written permission. Transmitting on certain frequencies without a license is illegal in many countries including Cambodia. Passive receiving (RTL-SDR listening) is generally fine. Never replay signals to bypass security you don't own.</div>
+      </div>
+
+      <div class="card-row" style="margin-top:24px;">
+        <div class="card" style="--card-color:#ce93d8">
+          <div class="card-title">Best Starter Tool</div>
+          <div class="card-body">RTL-SDR v3 dongle — $25, passive only, great for learning SDR fundamentals.</div>
+        </div>
+        <div class="card" style="--card-color:#4fc3f7">
+          <div class="card-title">Best Multi-Tool</div>
+          <div class="card-body">Flipper Zero — handles Sub-GHz, NFC, RFID, IR, iButton. All in one device.</div>
+        </div>
+        <div class="card" style="--card-color:#69f0ae">
+          <div class="card-title">Best Software</div>
+          <div class="card-body">Universal Radio Hacker (URH) — capture, decode, analyze, replay. All GUI.</div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ======================== RESOURCES ======================== -->
+    <div class="section" id="resources" style="--section-color:#69f0ae; --section-glow:rgba(105,240,174,0.15)">
+      <div class="section-header">
+        <div class="section-num">04</div>
+        <div class="section-title-block">
+          <div class="section-eyebrow">// FREE LEARNING MATERIALS</div>
+          <div class="section-title">RESOURCES</div>
+          <div class="section-desc">YouTube channels, websites, books, and practice labs — all curated for hardware hacking. Most are completely free.</div>
+        </div>
+      </div>
+
+      <!-- YouTube -->
+      <div class="code-label">// YouTube Channels</div>
+      <div class="res-grid">
+        <a class="res-card" href="https://www.youtube.com/@stacksmashing" target="_blank" style="--rc:#4fc3f7">
+          <div class="res-icon">▶</div>
+          <div class="res-info">
+            <div class="res-name">stacksmashing</div>
+            <div class="res-tag">UART · JTAG · Firmware · Hardware RE</div>
+            <div class="res-desc">Best hardware hacking channel on YouTube. Reverse engineers game cartridges, IoT devices, chips. Very practical.</div>
+          </div>
+          <div class="res-arrow">↗</div>
+        </a>
+        <a class="res-card" href="https://www.youtube.com/@MichaelOssmann" target="_blank" style="--rc:#ce93d8">
+          <div class="res-icon">▶</div>
+          <div class="res-info">
+            <div class="res-name">Michael Ossmann</div>
+            <div class="res-tag">SDR · RF · HackRF · Wireless</div>
+            <div class="res-desc">Creator of HackRF. His free SDR course is THE starting point for software defined radio hacking.</div>
+          </div>
+          <div class="res-arrow">↗</div>
+        </a>
+        <a class="res-card" href="https://www.youtube.com/@hackaday" target="_blank" style="--rc:#ff7043">
+          <div class="res-icon">▶</div>
+          <div class="res-info">
+            <div class="res-name">Hackaday</div>
+            <div class="res-tag">Hardware · Embedded · Electronics</div>
+            <div class="res-desc">Tons of hardware teardowns, security research, and embedded system hacks explained clearly.</div>
+          </div>
+          <div class="res-arrow">↗</div>
+        </a>
+        <a class="res-card" href="https://www.youtube.com/@LiveOverflow" target="_blank" style="--rc:#ffee58">
+          <div class="res-icon">▶</div>
+          <div class="res-info">
+            <div class="res-name">LiveOverflow</div>
+            <div class="res-tag">Hardware CTF · Firmware · Exploitation</div>
+            <div class="res-desc">You know him from binary exploitation. He also has excellent hardware hacking and CTF challenge series.</div>
+          </div>
+          <div class="res-arrow">↗</div>
+        </a>
+        <a class="res-card" href="https://www.youtube.com/@GuidedHacking" target="_blank" style="--rc:#69f0ae">
+          <div class="res-icon">▶</div>
+          <div class="res-info">
+            <div class="res-name">Guided Hacking</div>
+            <div class="res-tag">Reverse Engineering · Assembly · Ghidra</div>
+            <div class="res-desc">Deep reverse engineering tutorials. Great for when you pull binaries out of firmware and need to analyze them.</div>
+          </div>
+          <div class="res-arrow">↗</div>
+        </a>
+        <a class="res-card" href="https://www.youtube.com/@SecurityNow" target="_blank" style="--rc:#ce93d8">
+          <div class="res-icon">▶</div>
+          <div class="res-info">
+            <div class="res-name">Security Now (TWiT)</div>
+            <div class="res-tag">IoT Security · Protocols · Vulnerabilities</div>
+            <div class="res-desc">Weekly deep-dives into security topics including IoT and hardware vulnerabilities. Steve Gibson's analysis is top-tier.</div>
+          </div>
+          <div class="res-arrow">↗</div>
+        </a>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Websites -->
+      <div class="code-label">// Websites & Platforms</div>
+      <div class="res-grid">
+        <a class="res-card" href="https://hackaday.io" target="_blank" style="--rc:#ff7043">
+          <div class="res-icon">🌐</div>
+          <div class="res-info">
+            <div class="res-name">hackaday.io</div>
+            <div class="res-tag">Projects · Writeups · Community</div>
+            <div class="res-desc">Thousands of hardware hacking projects with full writeups. Great for finding how others attacked specific devices.</div>
+          </div>
+          <div class="res-arrow">↗</div>
+        </a>
+        <a class="res-card" href="https://rtl-sdr.com/rtl-sdr-quick-start-guide" target="_blank" style="--rc:#ce93d8">
+          <div class="res-icon">🌐</div>
+          <div class="res-info">
+            <div class="res-name">rtl-sdr.com</div>
+            <div class="res-tag">SDR · RF · Tutorials · Projects</div>
+            <div class="res-desc">The go-to community for RTL-SDR. Quick start guide, project ideas, and tutorials for every skill level.</div>
+          </div>
+          <div class="res-arrow">↗</div>
+        </a>
+        <a class="res-card" href="https://learn.sparkfun.com" target="_blank" style="--rc:#4fc3f7">
+          <div class="res-icon">🌐</div>
+          <div class="res-info">
+            <div class="res-name">SparkFun Learn</div>
+            <div class="res-tag">UART · SPI · I2C · Electronics</div>
+            <div class="res-desc">Best free electronics learning resource. Their protocol guides (UART, SPI, I2C) are required reading before any hardware attack.</div>
+          </div>
+          <div class="res-arrow">↗</div>
+        </a>
+        <a class="res-card" href="https://owasp.org/www-project-internet-of-things" target="_blank" style="--rc:#69f0ae">
+          <div class="res-icon">🌐</div>
+          <div class="res-info">
+            <div class="res-name">OWASP IoT Project</div>
+            <div class="res-tag">IoT Security · Attack Surface · Checklist</div>
+            <div class="res-desc">Official OWASP IoT attack surface guide. Use this as a checklist when pentesting any IoT or embedded device.</div>
+          </div>
+          <div class="res-arrow">↗</div>
+        </a>
+        <a class="res-card" href="https://wrongbaud.github.io" target="_blank" style="--rc:#ffee58">
+          <div class="res-icon">🌐</div>
+          <div class="res-info">
+            <div class="res-name">wrongbaud's Blog</div>
+            <div class="res-tag">UART · SPI · JTAG · Real Targets</div>
+            <div class="res-desc">Extremely detailed hardware hacking blog. Real device walkthroughs — UART discovery, flash dumping, JTAG debugging on actual products.</div>
+          </div>
+          <div class="res-arrow">↗</div>
+        </a>
+        <a class="res-card" href="https://embeddedbits.org" target="_blank" style="--rc:#ff7043">
+          <div class="res-icon">🌐</div>
+          <div class="res-info">
+            <div class="res-name">Embedded Bits</div>
+            <div class="res-tag">Firmware · Embedded Linux · Security</div>
+            <div class="res-desc">Technical deep dives into embedded Linux security, firmware analysis, and secure boot bypass techniques.</div>
+          </div>
+          <div class="res-arrow">↗</div>
+        </a>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- CTF / Practice -->
+      <div class="code-label">// Practice Labs & CTFs</div>
+      <div class="res-grid">
+        <a class="res-card" href="https://www.hackthebox.com/hacker/hacking-labs" target="_blank" style="--rc:#69f0ae">
+          <div class="res-icon">⚡</div>
+          <div class="res-info">
+            <div class="res-name">HackTheBox — Hardware</div>
+            <div class="res-tag">UART · Firmware · Logic · CTF</div>
+            <div class="res-desc">HTB hardware category challenges. You're already on HTB — just filter by Hardware. Logic captures, UART challenges, firmware RE.</div>
+          </div>
+          <div class="res-arrow">↗</div>
+        </a>
+        <a class="res-card" href="https://picoctf.org" target="_blank" style="--rc:#4fc3f7">
+          <div class="res-icon">⚡</div>
+          <div class="res-info">
+            <div class="res-name">picoCTF</div>
+            <div class="res-tag">Beginner · Binary · Hardware Intro</div>
+            <div class="res-desc">Free, beginner-friendly CTF with hardware and binary challenges. Good starting point before tackling HTB hardware.</div>
+          </div>
+          <div class="res-arrow">↗</div>
+        </a>
+        <a class="res-card" href="https://ctftime.org" target="_blank" style="--rc:#ffee58">
+          <div class="res-icon">⚡</div>
+          <div class="res-info">
+            <div class="res-name">CTFtime.org</div>
+            <div class="res-tag">Competitions · Hardware · Writeups</div>
+            <div class="res-desc">Find upcoming CTFs with hardware categories. Also read past writeups — they teach you real techniques used in competition.</div>
+          </div>
+          <div class="res-arrow">↗</div>
+        </a>
+        <a class="res-card" href="https://github.com/tothi/pwn-hisilicon-dvr" target="_blank" style="--rc:#ce93d8">
+          <div class="res-icon">⚡</div>
+          <div class="res-info">
+            <div class="res-name">GitHub — Real Device Writeups</div>
+            <div class="res-tag">UART · Firmware · Real Exploits</div>
+            <div class="res-desc">Search GitHub for "[device model] UART hack" or "firmware extraction writeup". Real researchers document their process publicly.</div>
+          </div>
+          <div class="res-arrow">↗</div>
+        </a>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Books -->
+      <div class="code-label">// Books (Most Have Free PDFs)</div>
+      <div class="res-grid">
+        <a class="res-card" href="https://nostarch.com/practical-iot-hacking" target="_blank" style="--rc:#ff7043">
+          <div class="res-icon">📖</div>
+          <div class="res-info">
+            <div class="res-name">Practical IoT Hacking</div>
+            <div class="res-tag">Fotios Chantzis et al. · 2021 · No Starch</div>
+            <div class="res-desc">Most practical book for IoT pentesting. Covers UART, firmware, RF, BLE, and web APIs all in one. The best single book to buy.</div>
+          </div>
+          <div class="res-arrow">↗</div>
+        </a>
+        <a class="res-card" href="https://www.bunniestudios.com/blog/?page_id=5617" target="_blank" style="--rc:#4fc3f7">
+          <div class="res-icon">📖</div>
+          <div class="res-info">
+            <div class="res-name">The Hardware Hacker</div>
+            <div class="res-tag">Andrew "bunnie" Huang · Legendary</div>
+            <div class="res-desc">Written by the guy who hacked the original Xbox. Covers supply chains, PCB reverse engineering, and hardware security philosophy.</div>
+          </div>
+          <div class="res-arrow">↗</div>
+        </a>
+        <a class="res-card" href="https://github.com/G4lile0/tinyGS" target="_blank" style="--rc:#69f0ae">
+          <div class="res-icon">📖</div>
+          <div class="res-info">
+            <div class="res-name">Hacking the Xbox (Free PDF)</div>
+            <div class="res-tag">Andrew Huang · Free Download Legal</div>
+            <div class="res-desc">The OG hardware hack. Bunnie released this for free. Classic story of breaking Xbox security through hardware — foundational reading.</div>
+          </div>
+          <div class="res-arrow">↗</div>
+        </a>
+        <a class="res-card" href="https://nostarch.com/iotpentestcookbook" target="_blank" style="--rc:#ffee58">
+          <div class="res-icon">📖</div>
+          <div class="res-info">
+            <div class="res-name">IoT Penetration Testing Cookbook</div>
+            <div class="res-tag">Aaron Guzman · Aditya Gupta</div>
+            <div class="res-desc">Recipe-style format. Each chapter is a specific attack. Great reference when you're targeting a specific component type.</div>
+          </div>
+          <div class="res-arrow">↗</div>
+        </a>
+      </div>
+
+      <div class="alert alert-tip" style="margin-top:28px;">
+        <div class="alert-icon">✓ ROTHANA</div>
+        <div>Start with: <strong>stacksmashing on YouTube</strong> → <strong>SparkFun Learn for protocols</strong> → <strong>wrongbaud's blog for real device walkthroughs</strong> → <strong>HTB Hardware challenges</strong>. That path alone will carry you from zero to solid intermediate in a few months.</div>
+      </div>
+
+    </div><!-- /resources section -->
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /layout -->
+
+<style>
+.res-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.res-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--rc, var(--blue));
+  border-radius: 4px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.res-card:hover {
+  border-color: var(--rc, var(--blue));
+  background: rgba(255,255,255,0.04);
+  transform: translateY(-1px);
+}
+
+.res-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  opacity: 0.7;
+}
+
+.res-info { flex: 1; }
+
+.res-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--rc, var(--blue));
+  margin-bottom: 3px;
+}
+
+.res-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.res-desc {
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.5;
+  font-weight: 300;
+}
+
+.res-arrow {
+  font-size: 14px;
+  color: var(--muted);
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.res-card:hover .res-arrow {
+  color: var(--rc, var(--blue));
+}
+</style>
+
+<script>
+function scrollTo(id) {
+  document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+
+// Highlight nav on scroll
+const sections = ['uart', 'firmware', 'wireless', 'resources'];
+const navItems = document.querySelectorAll('.nav-item');
+
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && window.scrollY >= el.offsetTop - 100) current = id;
+  });
+  navItems.forEach((n, i) => {
+    n.classList.toggle('active', sections[i] === current);
+  });
+}, { passive: true });
+</script>
+</body>
+</html>
