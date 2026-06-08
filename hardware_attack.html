@@ -27,6 +27,48 @@
   --code-bg: #050810;
 }
 
+/* Device image gallery styles */
+.device-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+  margin: 16px 0;
+}
+.device-img-card {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--surface2);
+  transition: border-color 0.2s, transform 0.2s;
+}
+.device-img-card:hover {
+  border-color: var(--gallery-color, var(--blue));
+  transform: translateY(-2px);
+}
+.device-img-card img {
+  width: 100%;
+  height: 130px;
+  object-fit: cover;
+  display: block;
+  filter: saturate(0.8) brightness(0.9);
+  transition: filter 0.2s;
+}
+.device-img-card:hover img { filter: saturate(1) brightness(1); }
+.device-img-label {
+  padding: 8px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--gallery-color, var(--blue));
+  letter-spacing: 1px;
+  border-top: 1px solid var(--border);
+}
+.device-img-sub {
+  padding: 0 10px 8px;
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 300;
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
@@ -519,6 +561,19 @@ body::after {
   .nav-section { padding: 0; }
   .hero, .content { padding-left: 20px; padding-right: 20px; }
 }
+
+.svg-device-img {
+  width: 100%;
+  height: 130px;
+  overflow: hidden;
+  display: block;
+  background: #050810;
+}
+.svg-device-img svg {
+  width: 100%;
+  height: 100%;
+}
+
 </style>
 </head>
 <body>
@@ -565,6 +620,238 @@ body::after {
     </div>
   </div>
 
+  <!-- Device showcase strip -->
+  <div style="background:var(--surface); border-bottom:1px solid var(--border); padding:20px 48px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:3px;margin-bottom:14px;">// KEY DEVICES AT A GLANCE</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;">
+
+      <div style="border:1px solid var(--border);border-radius:4px;overflow:hidden;background:var(--surface2);">
+        <div class="svg-device-img"><svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="120" fill="#050810"/>
+  <!-- PCB -->
+  <rect x="15" y="15" width="170" height="90" rx="3" fill="#0a1a08" stroke="#1a3a10" stroke-width="1.5"/>
+  <!-- Mounting holes -->
+  <circle cx="22" cy="22" r="3" fill="none" stroke="#2a4a20" stroke-width="1"/>
+  <circle cx="178" cy="22" r="3" fill="none" stroke="#2a4a20" stroke-width="1"/>
+  <circle cx="22" cy="98" r="3" fill="none" stroke="#2a4a20" stroke-width="1"/>
+  <circle cx="178" cy="98" r="3" fill="none" stroke="#2a4a20" stroke-width="1"/>
+  <!-- Main CPU chip -->
+  <rect x="60" y="25" width="50" height="50" rx="2" fill="#111120" stroke="#2a2a4a" stroke-width="1"/>
+  <text x="85" y="48" font-family="monospace" font-size="6" fill="#ce93d8" text-anchor="middle">MT7621</text>
+  <text x="85" y="58" font-family="monospace" font-size="5" fill="#546e7a" text-anchor="middle">SoC</text>
+  <!-- CPU pins -->
+  <line x1="60" y1="33" x2="52" y2="33" stroke="#2a2a4a" stroke-width="1"/>
+  <line x1="60" y1="39" x2="52" y2="39" stroke="#2a2a4a" stroke-width="1"/>
+  <line x1="60" y1="45" x2="52" y2="45" stroke="#2a2a4a" stroke-width="1"/>
+  <line x1="60" y1="51" x2="52" y2="51" stroke="#2a2a4a" stroke-width="1"/>
+  <line x1="110" y1="33" x2="118" y2="33" stroke="#2a2a4a" stroke-width="1"/>
+  <line x1="110" y1="39" x2="118" y2="39" stroke="#2a2a4a" stroke-width="1"/>
+  <line x1="110" y1="45" x2="118" y2="45" stroke="#2a2a4a" stroke-width="1"/>
+  <line x1="110" y1="51" x2="118" y2="51" stroke="#2a2a4a" stroke-width="1"/>
+  <!-- Flash chip -->
+  <rect x="130" y="30" width="30" height="18" rx="1" fill="#1a1a1a" stroke="#333" stroke-width="0.8"/>
+  <text x="145" y="41" font-family="monospace" font-size="5" fill="#ffee58" text-anchor="middle">W25Q64</text>
+  <!-- UART pads - highlighted! -->
+  <rect x="28" y="75" width="40" height="18" rx="2" fill="#001a00" stroke="#00ff41" stroke-width="1.5"/>
+  <text x="48" y="83" font-family="monospace" font-size="5.5" fill="#00ff41" text-anchor="middle">UART</text>
+  <circle cx="35" cy="90" r="3" fill="#ff7043" stroke="#ff7043" stroke-width="1"/>
+  <circle cx="45" cy="90" r="3" fill="#ffee58" stroke="#ffee58" stroke-width="1"/>
+  <circle cx="55" cy="90" r="3" fill="#4fc3f7" stroke="#4fc3f7" stroke-width="1"/>
+  <circle cx="65" cy="90" r="3" fill="#69f0ae" stroke="#69f0ae" stroke-width="1"/>
+  <text x="35" y="100" font-family="monospace" font-size="4" fill="#ff7043" text-anchor="middle">G</text>
+  <text x="45" y="100" font-family="monospace" font-size="4" fill="#ffee58" text-anchor="middle">V</text>
+  <text x="55" y="100" font-family="monospace" font-size="4" fill="#4fc3f7" text-anchor="middle">TX</text>
+  <text x="65" y="100" font-family="monospace" font-size="4" fill="#69f0ae" text-anchor="middle">RX</text>
+  <!-- Trace lines -->
+  <line x1="30" y1="55" x2="150" y2="55" stroke="#1a3a10" stroke-width="0.5" stroke-dasharray="3,3"/>
+  <line x1="85" y1="75" x2="85" y2="25" stroke="#1a3a10" stroke-width="0.5" stroke-dasharray="3,3"/>
+  <text x="100" y="115" font-family="monospace" font-size="7" fill="#00ff41" text-anchor="middle">Router PCB — UART Debug Port ↑</text>
+</svg></div>
+        <div style="padding:8px 10px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--blue);margin-bottom:2px;">USB-UART CH340</div>
+          <div style="font-size:11px;color:var(--muted);">Your first tool. ~$3</div>
+        </div>
+      </div>
+
+      <div style="border:1px solid var(--border);border-radius:4px;overflow:hidden;background:var(--surface2);">
+        <div class="svg-device-img"><svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="120" fill="#050810"/>
+  <!-- Device body -->
+  <rect x="25" y="20" width="90" height="55" rx="4" fill="#0d1520" stroke="#1c3050" stroke-width="1.5"/>
+  <!-- Screen area -->
+  <rect x="30" y="25" width="80" height="35" rx="2" fill="#020810" stroke="#243344" stroke-width="1"/>
+  <!-- Signal waves on screen -->
+  <polyline points="33,42 40,42 40,33 50,33 50,42 60,42 60,33 70,33 70,42 80,42 80,33 90,33 90,42 105,42" fill="none" stroke="#4fc3f7" stroke-width="1.5"/>
+  <polyline points="33,50 38,50 38,45 48,45 48,50 58,50 58,45 68,45 68,50 78,50 78,45 88,45 88,50 105,50" fill="none" stroke="#69f0ae" stroke-width="1.5"/>
+  <polyline points="33,57 44,57 44,52 54,52 54,57 64,57 64,52 74,52 74,57 105,57" fill="none" stroke="#ffee58" stroke-width="1.5"/>
+  <!-- CH1 CH2 labels -->
+  <text x="33" y="32" font-family="monospace" font-size="5" fill="#4fc3f7">CH1</text>
+  <!-- Probe wires -->
+  <line x1="115" y1="30" x2="175" y2="20" stroke="#4fc3f7" stroke-width="1.2"/>
+  <line x1="115" y1="38" x2="175" y2="35" stroke="#69f0ae" stroke-width="1.2"/>
+  <line x1="115" y1="46" x2="175" y2="50" stroke="#ffee58" stroke-width="1.2"/>
+  <line x1="115" y1="54" x2="175" y2="65" stroke="#ff7043" stroke-width="1.2"/>
+  <!-- Probe clips -->
+  <circle cx="176" cy="20" r="3" fill="#4fc3f7" opacity="0.8"/>
+  <circle cx="176" cy="35" r="3" fill="#69f0ae" opacity="0.8"/>
+  <circle cx="176" cy="50" r="3" fill="#ffee58" opacity="0.8"/>
+  <circle cx="176" cy="65" r="3" fill="#ff7043" opacity="0.8"/>
+  <!-- USB port on device -->
+  <rect x="50" y="75" width="20" height="8" rx="1" fill="#111" stroke="#333" stroke-width="0.8"/>
+  <text x="100" y="110" font-family="monospace" font-size="8" fill="#4fc3f7" text-anchor="middle">Logic Analyzer</text>
+</svg></div>
+        <div style="padding:8px 10px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--blue);margin-bottom:2px;">Logic Analyzer</div>
+          <div style="font-size:11px;color:var(--muted);">Sniff protocols. ~$8</div>
+        </div>
+      </div>
+
+      <div style="border:1px solid var(--border);border-radius:4px;overflow:hidden;background:var(--surface2);">
+        <div class="svg-device-img"><svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="120" fill="#050810"/>
+  <!-- Dongle body -->
+  <rect x="55" y="30" width="90" height="40" rx="4" fill="#1a1a2a" stroke="#3a3a5a" stroke-width="1.5"/>
+  <!-- RTL chip visible -->
+  <rect x="80" y="38" width="38" height="24" rx="2" fill="#111" stroke="#2a2a3a" stroke-width="1"/>
+  <text x="99" y="50" font-family="monospace" font-size="5.5" fill="#ce93d8" text-anchor="middle">RTL2832U</text>
+  <text x="99" y="59" font-family="monospace" font-size="5" fill="#546e7a" text-anchor="middle">+ R820T2</text>
+  <!-- USB plug -->
+  <rect x="30" y="42" width="26" height="16" rx="2" fill="#2a2a2a" stroke="#444" stroke-width="1"/>
+  <rect x="33" y="45" width="20" height="10" rx="1" fill="#111" stroke="#333" stroke-width="0.5"/>
+  <!-- SMA antenna connector -->
+  <circle cx="145" cy="50" r="7" fill="#2a2a2a" stroke="#555" stroke-width="1.5"/>
+  <circle cx="145" cy="50" r="3" fill="#888"/>
+  <line x1="152" y1="50" x2="170" y2="50" stroke="#888" stroke-width="2"/>
+  <!-- Antenna -->
+  <line x1="170" y1="50" x2="170" y2="15" stroke="#aaa" stroke-width="2"/>
+  <line x1="165" y1="15" x2="175" y2="15" stroke="#aaa" stroke-width="1.5"/>
+  <!-- Signal waves from antenna -->
+  <path d="M 178,30 Q 185,25 178,20" fill="none" stroke="#ce93d8" stroke-width="1" opacity="0.7"/>
+  <path d="M 182,32 Q 192,25 182,18" fill="none" stroke="#ce93d8" stroke-width="1" opacity="0.5"/>
+  <!-- Label on dongle -->
+  <text x="99" y="26" font-family="monospace" font-size="6" fill="#ce93d8" text-anchor="middle">RTL-SDR</text>
+  <!-- Freq range -->
+  <text x="100" y="85" font-family="monospace" font-size="6.5" fill="#ce93d8" text-anchor="middle">24 MHz — 1.7 GHz</text>
+  <text x="100" y="110" font-family="monospace" font-size="8" fill="#ce93d8" text-anchor="middle">RTL-SDR Dongle — ~$25</text>
+</svg></div>
+        <div style="padding:8px 10px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--purple);margin-bottom:2px;">RTL-SDR V4</div>
+          <div style="font-size:11px;color:var(--muted);">Listen to RF. ~$25</div>
+        </div>
+      </div>
+
+      <div style="border:1px solid var(--border);border-radius:4px;overflow:hidden;background:var(--surface2);">
+        <div class="svg-device-img"><svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="120" fill="#050810"/>
+  <!-- Device body -->
+  <rect x="50" y="15" width="100" height="90" rx="8" fill="#1a0d00" stroke="#ff7043" stroke-width="1.5"/>
+  <!-- Screen -->
+  <rect x="58" y="22" width="84" height="45" rx="3" fill="#020c02" stroke="#1a3a1a" stroke-width="1"/>
+  <!-- Screen content - dolphin icon simplified -->
+  <ellipse cx="100" cy="40" rx="18" ry="12" fill="#69f0ae" opacity="0.8"/>
+  <circle cx="93" cy="37" r="2" fill="#020c02"/>
+  <circle cx="107" cy="37" r="2" fill="#020c02"/>
+  <path d="M 95,44 Q 100,48 105,44" fill="none" stroke="#020c02" stroke-width="1.5"/>
+  <text x="100" y="59" font-family="monospace" font-size="5.5" fill="#69f0ae" text-anchor="middle">FLIPPER ZERO</text>
+  <!-- Buttons -->
+  <circle cx="75" cy="80" r="7" fill="#111" stroke="#ff7043" stroke-width="1"/>
+  <circle cx="100" cy="80" r="7" fill="#111" stroke="#ff7043" stroke-width="1"/>
+  <circle cx="125" cy="80" r="7" fill="#111" stroke="#ff7043" stroke-width="1"/>
+  <text x="75" y="83" font-family="monospace" font-size="7" fill="#ff7043" text-anchor="middle">◀</text>
+  <text x="100" y="83" font-family="monospace" font-size="7" fill="#ff7043" text-anchor="middle">●</text>
+  <text x="125" y="83" font-family="monospace" font-size="7" fill="#ff7043" text-anchor="middle">▶</text>
+  <!-- IR / RF signal indicators -->
+  <text x="58" y="104" font-family="monospace" font-size="5" fill="#546e7a">RF·NFC·RFID·IR·BLE</text>
+  <text x="100" y="115" font-family="monospace" font-size="7.5" fill="#ff7043" text-anchor="middle">Flipper Zero — ~$169</text>
+</svg></div>
+        <div style="padding:8px 10px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--purple);margin-bottom:2px;">Flipper Zero</div>
+          <div style="font-size:11px;color:var(--muted);">All-in-one. ~$169</div>
+        </div>
+      </div>
+
+      <div style="border:1px solid var(--border);border-radius:4px;overflow:hidden;background:var(--surface2);">
+        <div class="svg-device-img"><svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="120" fill="#050810"/>
+  <!-- PCB -->
+  <rect x="25" y="20" width="110" height="80" rx="3" fill="#0a0a1a" stroke="#1a1a3a" stroke-width="1.5"/>
+  <!-- OLED screen -->
+  <rect x="33" y="27" width="65" height="30" rx="2" fill="#000510" stroke="#1c2a3a" stroke-width="1"/>
+  <text x="65" y="38" font-family="monospace" font-size="5.5" fill="#4fc3f7" text-anchor="middle">BUS PIRATE</text>
+  <text x="65" y="48" font-family="monospace" font-size="5" fill="#69f0ae" text-anchor="middle">UART&gt; </text>
+  <!-- Chip -->
+  <rect x="105" y="30" width="22" height="22" rx="1" fill="#111" stroke="#2a2a3a" stroke-width="0.8"/>
+  <text x="116" y="42" font-family="monospace" font-size="4.5" fill="#4fc3f7" text-anchor="middle">PIC</text>
+  <!-- Header pins -->
+  <rect x="33" y="72" width="95" height="18" rx="1" fill="#0d0d0d" stroke="#2a2a2a" stroke-width="0.8"/>
+  <text x="80" y="84" font-family="monospace" font-size="5" fill="#ffee58" text-anchor="middle">MOSI MISO CLK CS AUX</text>
+  <!-- Pin dots -->
+  <circle cx="40" cy="78" r="2" fill="#4fc3f7"/>
+  <circle cx="52" cy="78" r="2" fill="#69f0ae"/>
+  <circle cx="64" cy="78" r="2" fill="#ffee58"/>
+  <circle cx="76" cy="78" r="2" fill="#ce93d8"/>
+  <circle cx="88" cy="78" r="2" fill="#ff7043"/>
+  <!-- USB -->
+  <rect x="135" y="50" width="22" height="14" rx="2" fill="#2a2a2a" stroke="#444" stroke-width="1"/>
+  <rect x="138" y="53" width="16" height="8" rx="1" fill="#111"/>
+  <!-- Probe wires going right -->
+  <line x1="157" y1="30" x2="185" y2="20" stroke="#4fc3f7" stroke-width="1"/>
+  <line x1="157" y1="37" x2="185" y2="35" stroke="#69f0ae" stroke-width="1"/>
+  <line x1="157" y1="44" x2="185" y2="50" stroke="#ffee58" stroke-width="1"/>
+  <line x1="157" y1="51" x2="185" y2="65" stroke="#ff7043" stroke-width="1"/>
+  <circle cx="186" cy="20" r="2.5" fill="#4fc3f7"/>
+  <circle cx="186" cy="35" r="2.5" fill="#69f0ae"/>
+  <circle cx="186" cy="50" r="2.5" fill="#ffee58"/>
+  <circle cx="186" cy="65" r="2.5" fill="#ff7043"/>
+  <text x="100" y="112" font-family="monospace" font-size="7.5" fill="#4fc3f7" text-anchor="middle">Bus Pirate — Protocol Tool ~$30</text>
+</svg></div>
+        <div style="padding:8px 10px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--orange);margin-bottom:2px;">Bus Pirate</div>
+          <div style="font-size:11px;color:var(--muted);">Protocol swiss knife. ~$30</div>
+        </div>
+      </div>
+
+      <div style="border:1px solid var(--border);border-radius:4px;overflow:hidden;background:var(--surface2);">
+        <div class="svg-device-img"><svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="120" fill="#050810"/>
+  <!-- PCB board -->
+  <rect x="20" y="20" width="160" height="80" rx="3" fill="#0a1500" stroke="#1a3000" stroke-width="1.5"/>
+  <!-- Mounting holes -->
+  <circle cx="28" cy="28" r="3" fill="none" stroke="#2a5000" stroke-width="1"/>
+  <circle cx="172" cy="28" r="3" fill="none" stroke="#2a5000" stroke-width="1"/>
+  <circle cx="28" cy="92" r="3" fill="none" stroke="#2a5000" stroke-width="1"/>
+  <circle cx="172" cy="92" r="3" fill="none" stroke="#2a5000" stroke-width="1"/>
+  <!-- Main RFIC chip -->
+  <rect x="65" y="30" width="45" height="45" rx="2" fill="#111" stroke="#2a4a00" stroke-width="1"/>
+  <text x="87" y="50" font-family="monospace" font-size="5.5" fill="#69f0ae" text-anchor="middle">MAX2837</text>
+  <text x="87" y="60" font-family="monospace" font-size="5" fill="#546e7a" text-anchor="middle">RF Transceiver</text>
+  <!-- CPLD chip -->
+  <rect x="120" y="35" width="30" height="22" rx="1" fill="#0d0d1a" stroke="#2a2a4a" stroke-width="1"/>
+  <text x="135" y="48" font-family="monospace" font-size="5" fill="#4fc3f7" text-anchor="middle">CPLD</text>
+  <!-- USB port -->
+  <rect x="20" y="50" width="18" height="12" rx="1" fill="#2a2a2a" stroke="#444" stroke-width="1"/>
+  <text x="29" y="59" font-family="monospace" font-size="4.5" fill="#444" text-anchor="middle">USB</text>
+  <!-- SMA connectors -->
+  <circle cx="162" cy="40" r="6" fill="#333" stroke="#666" stroke-width="1"/>
+  <circle cx="162" cy="40" r="2.5" fill="#888"/>
+  <circle cx="162" cy="70" r="6" fill="#333" stroke="#666" stroke-width="1"/>
+  <circle cx="162" cy="70" r="2.5" fill="#888"/>
+  <text x="173" y="43" font-family="monospace" font-size="5" fill="#69f0ae">TX</text>
+  <text x="173" y="73" font-family="monospace" font-size="5" fill="#4fc3f7">RX</text>
+  <!-- Label -->
+  <text x="50" y="82" font-family="monospace" font-size="7" fill="#69f0ae">HackRF One</text>
+  <text x="50" y="91" font-family="monospace" font-size="5.5" fill="#546e7a">1 MHz — 6 GHz TX/RX</text>
+  <text x="100" y="110" font-family="monospace" font-size="7.5" fill="#69f0ae" text-anchor="middle">HackRF One — clone ~$50</text>
+</svg></div>
+        <div style="padding:8px 10px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--orange);margin-bottom:2px;">HackRF One</div>
+          <div style="font-size:11px;color:var(--muted);">TX+RX SDR. clone ~$50</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <div class="content">
 
     <!-- ======================== UART ======================== -->
@@ -599,6 +886,130 @@ body::after {
         <div class="card" style="--card-color:#ffee58">
           <div class="card-title">VCC (Optional)</div>
           <div class="card-body">Power. Usually DON'T connect — device is already powered.</div>
+        </div>
+      </div>
+
+      <div class="code-label">// Real Hardware You'll Use</div>
+      <div class="device-gallery" style="--gallery-color:#4fc3f7">
+        <div class="device-img-card">
+          <div class="svg-device-img"><svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="120" fill="#050810"/>
+  <!-- PCB -->
+  <rect x="15" y="15" width="170" height="90" rx="3" fill="#0a1a08" stroke="#1a3a10" stroke-width="1.5"/>
+  <!-- Mounting holes -->
+  <circle cx="22" cy="22" r="3" fill="none" stroke="#2a4a20" stroke-width="1"/>
+  <circle cx="178" cy="22" r="3" fill="none" stroke="#2a4a20" stroke-width="1"/>
+  <circle cx="22" cy="98" r="3" fill="none" stroke="#2a4a20" stroke-width="1"/>
+  <circle cx="178" cy="98" r="3" fill="none" stroke="#2a4a20" stroke-width="1"/>
+  <!-- Main CPU chip -->
+  <rect x="60" y="25" width="50" height="50" rx="2" fill="#111120" stroke="#2a2a4a" stroke-width="1"/>
+  <text x="85" y="48" font-family="monospace" font-size="6" fill="#ce93d8" text-anchor="middle">MT7621</text>
+  <text x="85" y="58" font-family="monospace" font-size="5" fill="#546e7a" text-anchor="middle">SoC</text>
+  <!-- CPU pins -->
+  <line x1="60" y1="33" x2="52" y2="33" stroke="#2a2a4a" stroke-width="1"/>
+  <line x1="60" y1="39" x2="52" y2="39" stroke="#2a2a4a" stroke-width="1"/>
+  <line x1="60" y1="45" x2="52" y2="45" stroke="#2a2a4a" stroke-width="1"/>
+  <line x1="60" y1="51" x2="52" y2="51" stroke="#2a2a4a" stroke-width="1"/>
+  <line x1="110" y1="33" x2="118" y2="33" stroke="#2a2a4a" stroke-width="1"/>
+  <line x1="110" y1="39" x2="118" y2="39" stroke="#2a2a4a" stroke-width="1"/>
+  <line x1="110" y1="45" x2="118" y2="45" stroke="#2a2a4a" stroke-width="1"/>
+  <line x1="110" y1="51" x2="118" y2="51" stroke="#2a2a4a" stroke-width="1"/>
+  <!-- Flash chip -->
+  <rect x="130" y="30" width="30" height="18" rx="1" fill="#1a1a1a" stroke="#333" stroke-width="0.8"/>
+  <text x="145" y="41" font-family="monospace" font-size="5" fill="#ffee58" text-anchor="middle">W25Q64</text>
+  <!-- UART pads - highlighted! -->
+  <rect x="28" y="75" width="40" height="18" rx="2" fill="#001a00" stroke="#00ff41" stroke-width="1.5"/>
+  <text x="48" y="83" font-family="monospace" font-size="5.5" fill="#00ff41" text-anchor="middle">UART</text>
+  <circle cx="35" cy="90" r="3" fill="#ff7043" stroke="#ff7043" stroke-width="1"/>
+  <circle cx="45" cy="90" r="3" fill="#ffee58" stroke="#ffee58" stroke-width="1"/>
+  <circle cx="55" cy="90" r="3" fill="#4fc3f7" stroke="#4fc3f7" stroke-width="1"/>
+  <circle cx="65" cy="90" r="3" fill="#69f0ae" stroke="#69f0ae" stroke-width="1"/>
+  <text x="35" y="100" font-family="monospace" font-size="4" fill="#ff7043" text-anchor="middle">G</text>
+  <text x="45" y="100" font-family="monospace" font-size="4" fill="#ffee58" text-anchor="middle">V</text>
+  <text x="55" y="100" font-family="monospace" font-size="4" fill="#4fc3f7" text-anchor="middle">TX</text>
+  <text x="65" y="100" font-family="monospace" font-size="4" fill="#69f0ae" text-anchor="middle">RX</text>
+  <!-- Trace lines -->
+  <line x1="30" y1="55" x2="150" y2="55" stroke="#1a3a10" stroke-width="0.5" stroke-dasharray="3,3"/>
+  <line x1="85" y1="75" x2="85" y2="25" stroke="#1a3a10" stroke-width="0.5" stroke-dasharray="3,3"/>
+  <text x="100" y="115" font-family="monospace" font-size="7" fill="#00ff41" text-anchor="middle">Router PCB — UART Debug Port ↑</text>
+</svg></div>
+          <div class="device-img-label">USB-UART Adapter</div>
+          <div class="device-img-sub">CH340 / CP2102 — ~$3</div>
+        </div>
+        <div class="device-img-card">
+          <div class="svg-device-img"><svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="120" fill="#050810"/>
+  <!-- Device body -->
+  <rect x="25" y="20" width="90" height="55" rx="4" fill="#0d1520" stroke="#1c3050" stroke-width="1.5"/>
+  <!-- Screen area -->
+  <rect x="30" y="25" width="80" height="35" rx="2" fill="#020810" stroke="#243344" stroke-width="1"/>
+  <!-- Signal waves on screen -->
+  <polyline points="33,42 40,42 40,33 50,33 50,42 60,42 60,33 70,33 70,42 80,42 80,33 90,33 90,42 105,42" fill="none" stroke="#4fc3f7" stroke-width="1.5"/>
+  <polyline points="33,50 38,50 38,45 48,45 48,50 58,50 58,45 68,45 68,50 78,50 78,45 88,45 88,50 105,50" fill="none" stroke="#69f0ae" stroke-width="1.5"/>
+  <polyline points="33,57 44,57 44,52 54,52 54,57 64,57 64,52 74,52 74,57 105,57" fill="none" stroke="#ffee58" stroke-width="1.5"/>
+  <!-- CH1 CH2 labels -->
+  <text x="33" y="32" font-family="monospace" font-size="5" fill="#4fc3f7">CH1</text>
+  <!-- Probe wires -->
+  <line x1="115" y1="30" x2="175" y2="20" stroke="#4fc3f7" stroke-width="1.2"/>
+  <line x1="115" y1="38" x2="175" y2="35" stroke="#69f0ae" stroke-width="1.2"/>
+  <line x1="115" y1="46" x2="175" y2="50" stroke="#ffee58" stroke-width="1.2"/>
+  <line x1="115" y1="54" x2="175" y2="65" stroke="#ff7043" stroke-width="1.2"/>
+  <!-- Probe clips -->
+  <circle cx="176" cy="20" r="3" fill="#4fc3f7" opacity="0.8"/>
+  <circle cx="176" cy="35" r="3" fill="#69f0ae" opacity="0.8"/>
+  <circle cx="176" cy="50" r="3" fill="#ffee58" opacity="0.8"/>
+  <circle cx="176" cy="65" r="3" fill="#ff7043" opacity="0.8"/>
+  <!-- USB port on device -->
+  <rect x="50" y="75" width="20" height="8" rx="1" fill="#111" stroke="#333" stroke-width="0.8"/>
+  <text x="100" y="110" font-family="monospace" font-size="8" fill="#4fc3f7" text-anchor="middle">Logic Analyzer</text>
+</svg></div>
+          <div class="device-img-label">Logic Analyzer</div>
+          <div class="device-img-sub">Saleae clone — ~$8</div>
+        </div>
+        <div class="device-img-card">
+          <div class="svg-device-img"><svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="120" fill="#050810"/>
+  <!-- PCB -->
+  <rect x="15" y="15" width="170" height="90" rx="3" fill="#0a1a08" stroke="#1a3a10" stroke-width="1.5"/>
+  <!-- Mounting holes -->
+  <circle cx="22" cy="22" r="3" fill="none" stroke="#2a4a20" stroke-width="1"/>
+  <circle cx="178" cy="22" r="3" fill="none" stroke="#2a4a20" stroke-width="1"/>
+  <circle cx="22" cy="98" r="3" fill="none" stroke="#2a4a20" stroke-width="1"/>
+  <circle cx="178" cy="98" r="3" fill="none" stroke="#2a4a20" stroke-width="1"/>
+  <!-- Main CPU chip -->
+  <rect x="60" y="25" width="50" height="50" rx="2" fill="#111120" stroke="#2a2a4a" stroke-width="1"/>
+  <text x="85" y="48" font-family="monospace" font-size="6" fill="#ce93d8" text-anchor="middle">MT7621</text>
+  <text x="85" y="58" font-family="monospace" font-size="5" fill="#546e7a" text-anchor="middle">SoC</text>
+  <!-- CPU pins -->
+  <line x1="60" y1="33" x2="52" y2="33" stroke="#2a2a4a" stroke-width="1"/>
+  <line x1="60" y1="39" x2="52" y2="39" stroke="#2a2a4a" stroke-width="1"/>
+  <line x1="60" y1="45" x2="52" y2="45" stroke="#2a2a4a" stroke-width="1"/>
+  <line x1="60" y1="51" x2="52" y2="51" stroke="#2a2a4a" stroke-width="1"/>
+  <line x1="110" y1="33" x2="118" y2="33" stroke="#2a2a4a" stroke-width="1"/>
+  <line x1="110" y1="39" x2="118" y2="39" stroke="#2a2a4a" stroke-width="1"/>
+  <line x1="110" y1="45" x2="118" y2="45" stroke="#2a2a4a" stroke-width="1"/>
+  <line x1="110" y1="51" x2="118" y2="51" stroke="#2a2a4a" stroke-width="1"/>
+  <!-- Flash chip -->
+  <rect x="130" y="30" width="30" height="18" rx="1" fill="#1a1a1a" stroke="#333" stroke-width="0.8"/>
+  <text x="145" y="41" font-family="monospace" font-size="5" fill="#ffee58" text-anchor="middle">W25Q64</text>
+  <!-- UART pads - highlighted! -->
+  <rect x="28" y="75" width="40" height="18" rx="2" fill="#001a00" stroke="#00ff41" stroke-width="1.5"/>
+  <text x="48" y="83" font-family="monospace" font-size="5.5" fill="#00ff41" text-anchor="middle">UART</text>
+  <circle cx="35" cy="90" r="3" fill="#ff7043" stroke="#ff7043" stroke-width="1"/>
+  <circle cx="45" cy="90" r="3" fill="#ffee58" stroke="#ffee58" stroke-width="1"/>
+  <circle cx="55" cy="90" r="3" fill="#4fc3f7" stroke="#4fc3f7" stroke-width="1"/>
+  <circle cx="65" cy="90" r="3" fill="#69f0ae" stroke="#69f0ae" stroke-width="1"/>
+  <text x="35" y="100" font-family="monospace" font-size="4" fill="#ff7043" text-anchor="middle">G</text>
+  <text x="45" y="100" font-family="monospace" font-size="4" fill="#ffee58" text-anchor="middle">V</text>
+  <text x="55" y="100" font-family="monospace" font-size="4" fill="#4fc3f7" text-anchor="middle">TX</text>
+  <text x="65" y="100" font-family="monospace" font-size="4" fill="#69f0ae" text-anchor="middle">RX</text>
+  <!-- Trace lines -->
+  <line x1="30" y1="55" x2="150" y2="55" stroke="#1a3a10" stroke-width="0.5" stroke-dasharray="3,3"/>
+  <line x1="85" y1="75" x2="85" y2="25" stroke="#1a3a10" stroke-width="0.5" stroke-dasharray="3,3"/>
+  <text x="100" y="115" font-family="monospace" font-size="7" fill="#00ff41" text-anchor="middle">Router PCB — UART Debug Port ↑</text>
+</svg></div>
+          <div class="device-img-label">Router PCB</div>
+          <div class="device-img-sub">UART debug pads exposed</div>
         </div>
       </div>
 
@@ -720,6 +1131,107 @@ body::after {
       </div>
 
       <div class="code-label">// Two Ways to Get Firmware</div>
+      <div class="device-gallery" style="--gallery-color:#ff7043">
+        <div class="device-img-card">
+          <div class="svg-device-img"><svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="120" fill="#050810"/>
+  <!-- PCB -->
+  <rect x="15" y="15" width="170" height="90" rx="3" fill="#0a1a08" stroke="#1a3a10" stroke-width="1.5"/>
+  <!-- Mounting holes -->
+  <circle cx="22" cy="22" r="3" fill="none" stroke="#2a4a20" stroke-width="1"/>
+  <circle cx="178" cy="22" r="3" fill="none" stroke="#2a4a20" stroke-width="1"/>
+  <circle cx="22" cy="98" r="3" fill="none" stroke="#2a4a20" stroke-width="1"/>
+  <circle cx="178" cy="98" r="3" fill="none" stroke="#2a4a20" stroke-width="1"/>
+  <!-- Main CPU chip -->
+  <rect x="60" y="25" width="50" height="50" rx="2" fill="#111120" stroke="#2a2a4a" stroke-width="1"/>
+  <text x="85" y="48" font-family="monospace" font-size="6" fill="#ce93d8" text-anchor="middle">MT7621</text>
+  <text x="85" y="58" font-family="monospace" font-size="5" fill="#546e7a" text-anchor="middle">SoC</text>
+  <!-- CPU pins -->
+  <line x1="60" y1="33" x2="52" y2="33" stroke="#2a2a4a" stroke-width="1"/>
+  <line x1="60" y1="39" x2="52" y2="39" stroke="#2a2a4a" stroke-width="1"/>
+  <line x1="60" y1="45" x2="52" y2="45" stroke="#2a2a4a" stroke-width="1"/>
+  <line x1="60" y1="51" x2="52" y2="51" stroke="#2a2a4a" stroke-width="1"/>
+  <line x1="110" y1="33" x2="118" y2="33" stroke="#2a2a4a" stroke-width="1"/>
+  <line x1="110" y1="39" x2="118" y2="39" stroke="#2a2a4a" stroke-width="1"/>
+  <line x1="110" y1="45" x2="118" y2="45" stroke="#2a2a4a" stroke-width="1"/>
+  <line x1="110" y1="51" x2="118" y2="51" stroke="#2a2a4a" stroke-width="1"/>
+  <!-- Flash chip -->
+  <rect x="130" y="30" width="30" height="18" rx="1" fill="#1a1a1a" stroke="#333" stroke-width="0.8"/>
+  <text x="145" y="41" font-family="monospace" font-size="5" fill="#ffee58" text-anchor="middle">W25Q64</text>
+  <!-- UART pads - highlighted! -->
+  <rect x="28" y="75" width="40" height="18" rx="2" fill="#001a00" stroke="#00ff41" stroke-width="1.5"/>
+  <text x="48" y="83" font-family="monospace" font-size="5.5" fill="#00ff41" text-anchor="middle">UART</text>
+  <circle cx="35" cy="90" r="3" fill="#ff7043" stroke="#ff7043" stroke-width="1"/>
+  <circle cx="45" cy="90" r="3" fill="#ffee58" stroke="#ffee58" stroke-width="1"/>
+  <circle cx="55" cy="90" r="3" fill="#4fc3f7" stroke="#4fc3f7" stroke-width="1"/>
+  <circle cx="65" cy="90" r="3" fill="#69f0ae" stroke="#69f0ae" stroke-width="1"/>
+  <text x="35" y="100" font-family="monospace" font-size="4" fill="#ff7043" text-anchor="middle">G</text>
+  <text x="45" y="100" font-family="monospace" font-size="4" fill="#ffee58" text-anchor="middle">V</text>
+  <text x="55" y="100" font-family="monospace" font-size="4" fill="#4fc3f7" text-anchor="middle">TX</text>
+  <text x="65" y="100" font-family="monospace" font-size="4" fill="#69f0ae" text-anchor="middle">RX</text>
+  <!-- Trace lines -->
+  <line x1="30" y1="55" x2="150" y2="55" stroke="#1a3a10" stroke-width="0.5" stroke-dasharray="3,3"/>
+  <line x1="85" y1="75" x2="85" y2="25" stroke="#1a3a10" stroke-width="0.5" stroke-dasharray="3,3"/>
+  <text x="100" y="115" font-family="monospace" font-size="7" fill="#00ff41" text-anchor="middle">Router PCB — UART Debug Port ↑</text>
+</svg></div>
+          <div class="device-img-label">SOIC8 SPI Clip</div>
+          <div class="device-img-sub">Clips onto flash chip without desoldering</div>
+        </div>
+        <div class="device-img-card">
+          <div class="svg-device-img"><svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="120" fill="#050810"/>
+  <!-- Terminal window -->
+  <rect x="15" y="15" width="170" height="90" rx="4" fill="#020810" stroke="#1c2a3a" stroke-width="1.5"/>
+  <!-- Title bar -->
+  <rect x="15" y="15" width="170" height="16" rx="4" fill="#0d1520" stroke="#1c2a3a" stroke-width="1.5"/>
+  <circle cx="26" cy="23" r="3" fill="#ff5f57"/>
+  <circle cx="37" cy="23" r="3" fill="#ffbd2e"/>
+  <circle cx="48" cy="23" r="3" fill="#28c840"/>
+  <text x="100" y="26" font-family="monospace" font-size="6" fill="#546e7a" text-anchor="middle">binwalk — firmware.bin</text>
+  <!-- Terminal content -->
+  <text x="22" y="43" font-family="monospace" font-size="6" fill="#69f0ae">$ binwalk -e firmware.bin</text>
+  <text x="22" y="53" font-family="monospace" font-size="5.5" fill="#4fc3f7">DECIMAL   HEX      DESCRIPTION</text>
+  <line x1="22" y1="56" x2="178" y2="56" stroke="#1c2a3a" stroke-width="0.5"/>
+  <text x="22" y="64" font-family="monospace" font-size="5.5" fill="#b0bec5">0         0x0      LZMA compressed</text>
+  <text x="22" y="72" font-family="monospace" font-size="5.5" fill="#b0bec5">1835008   0x1C0000 Squashfs FS</text>
+  <text x="22" y="80" font-family="monospace" font-size="5.5" fill="#ffee58">6815744   0x680000 JFFS2 filesystem</text>
+  <text x="22" y="90" font-family="monospace" font-size="6" fill="#69f0ae">$ cd _firmware.bin.extracted/</text>
+  <text x="22" y="99" font-family="monospace" font-size="6" fill="#69f0ae">$ ls squashfs-root/<span></span></text>
+  <!-- Cursor -->
+  <rect x="22" y="101" width="5" height="7" fill="#69f0ae" opacity="0.8"/>
+  <text x="100" y="115" font-family="monospace" font-size="7" fill="#ff7043" text-anchor="middle">Binwalk Firmware Extraction</text>
+</svg></div>
+          <div class="device-img-label">Flash Chip on PCB</div>
+          <div class="device-img-sub">W25Q64 / MX25L — 8-pin IC</div>
+        </div>
+        <div class="device-img-card">
+          <div class="svg-device-img"><svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="120" fill="#050810"/>
+  <!-- Terminal window -->
+  <rect x="15" y="15" width="170" height="90" rx="4" fill="#020810" stroke="#1c2a3a" stroke-width="1.5"/>
+  <!-- Title bar -->
+  <rect x="15" y="15" width="170" height="16" rx="4" fill="#0d1520" stroke="#1c2a3a" stroke-width="1.5"/>
+  <circle cx="26" cy="23" r="3" fill="#ff5f57"/>
+  <circle cx="37" cy="23" r="3" fill="#ffbd2e"/>
+  <circle cx="48" cy="23" r="3" fill="#28c840"/>
+  <text x="100" y="26" font-family="monospace" font-size="6" fill="#546e7a" text-anchor="middle">binwalk — firmware.bin</text>
+  <!-- Terminal content -->
+  <text x="22" y="43" font-family="monospace" font-size="6" fill="#69f0ae">$ binwalk -e firmware.bin</text>
+  <text x="22" y="53" font-family="monospace" font-size="5.5" fill="#4fc3f7">DECIMAL   HEX      DESCRIPTION</text>
+  <line x1="22" y1="56" x2="178" y2="56" stroke="#1c2a3a" stroke-width="0.5"/>
+  <text x="22" y="64" font-family="monospace" font-size="5.5" fill="#b0bec5">0         0x0      LZMA compressed</text>
+  <text x="22" y="72" font-family="monospace" font-size="5.5" fill="#b0bec5">1835008   0x1C0000 Squashfs FS</text>
+  <text x="22" y="80" font-family="monospace" font-size="5.5" fill="#ffee58">6815744   0x680000 JFFS2 filesystem</text>
+  <text x="22" y="90" font-family="monospace" font-size="6" fill="#69f0ae">$ cd _firmware.bin.extracted/</text>
+  <text x="22" y="99" font-family="monospace" font-size="6" fill="#69f0ae">$ ls squashfs-root/<span></span></text>
+  <!-- Cursor -->
+  <rect x="22" y="101" width="5" height="7" fill="#69f0ae" opacity="0.8"/>
+  <text x="100" y="115" font-family="monospace" font-size="7" fill="#ff7043" text-anchor="middle">Binwalk Firmware Extraction</text>
+</svg></div>
+          <div class="device-img-label">Binwalk + Ghidra</div>
+          <div class="device-img-sub">Analyze extracted filesystem</div>
+        </div>
+      </div>
       <div class="card-row">
         <div class="card" style="--card-color:#ff7043">
           <div class="card-title">Method A — Download (Easy)</div>
@@ -871,6 +1383,103 @@ body::after {
           <div class="section-eyebrow">// RF / SDR / PROTOCOL ATTACKS</div>
           <div class="section-title">WIRELESS HARDWARE HACKING</div>
           <div class="section-desc">Everything talks wirelessly. Most of it isn't encrypted or authenticated properly. SDR lets you listen to, analyze, and replay radio signals.</div>
+        </div>
+      </div>
+
+      <div class="code-label">// Your RF Arsenal</div>
+      <div class="device-gallery" style="--gallery-color:#ce93d8">
+        <div class="device-img-card">
+          <div class="svg-device-img"><svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="120" fill="#050810"/>
+  <!-- Dongle body -->
+  <rect x="55" y="30" width="90" height="40" rx="4" fill="#1a1a2a" stroke="#3a3a5a" stroke-width="1.5"/>
+  <!-- RTL chip visible -->
+  <rect x="80" y="38" width="38" height="24" rx="2" fill="#111" stroke="#2a2a3a" stroke-width="1"/>
+  <text x="99" y="50" font-family="monospace" font-size="5.5" fill="#ce93d8" text-anchor="middle">RTL2832U</text>
+  <text x="99" y="59" font-family="monospace" font-size="5" fill="#546e7a" text-anchor="middle">+ R820T2</text>
+  <!-- USB plug -->
+  <rect x="30" y="42" width="26" height="16" rx="2" fill="#2a2a2a" stroke="#444" stroke-width="1"/>
+  <rect x="33" y="45" width="20" height="10" rx="1" fill="#111" stroke="#333" stroke-width="0.5"/>
+  <!-- SMA antenna connector -->
+  <circle cx="145" cy="50" r="7" fill="#2a2a2a" stroke="#555" stroke-width="1.5"/>
+  <circle cx="145" cy="50" r="3" fill="#888"/>
+  <line x1="152" y1="50" x2="170" y2="50" stroke="#888" stroke-width="2"/>
+  <!-- Antenna -->
+  <line x1="170" y1="50" x2="170" y2="15" stroke="#aaa" stroke-width="2"/>
+  <line x1="165" y1="15" x2="175" y2="15" stroke="#aaa" stroke-width="1.5"/>
+  <!-- Signal waves from antenna -->
+  <path d="M 178,30 Q 185,25 178,20" fill="none" stroke="#ce93d8" stroke-width="1" opacity="0.7"/>
+  <path d="M 182,32 Q 192,25 182,18" fill="none" stroke="#ce93d8" stroke-width="1" opacity="0.5"/>
+  <!-- Label on dongle -->
+  <text x="99" y="26" font-family="monospace" font-size="6" fill="#ce93d8" text-anchor="middle">RTL-SDR</text>
+  <!-- Freq range -->
+  <text x="100" y="85" font-family="monospace" font-size="6.5" fill="#ce93d8" text-anchor="middle">24 MHz — 1.7 GHz</text>
+  <text x="100" y="110" font-family="monospace" font-size="8" fill="#ce93d8" text-anchor="middle">RTL-SDR Dongle — ~$25</text>
+</svg></div>
+          <div class="device-img-label">RTL-SDR V4</div>
+          <div class="device-img-sub">Passive RF receiver — ~$25. Start here.</div>
+        </div>
+        <div class="device-img-card">
+          <div class="svg-device-img"><svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="120" fill="#050810"/>
+  <!-- Device body -->
+  <rect x="50" y="15" width="100" height="90" rx="8" fill="#1a0d00" stroke="#ff7043" stroke-width="1.5"/>
+  <!-- Screen -->
+  <rect x="58" y="22" width="84" height="45" rx="3" fill="#020c02" stroke="#1a3a1a" stroke-width="1"/>
+  <!-- Screen content - dolphin icon simplified -->
+  <ellipse cx="100" cy="40" rx="18" ry="12" fill="#69f0ae" opacity="0.8"/>
+  <circle cx="93" cy="37" r="2" fill="#020c02"/>
+  <circle cx="107" cy="37" r="2" fill="#020c02"/>
+  <path d="M 95,44 Q 100,48 105,44" fill="none" stroke="#020c02" stroke-width="1.5"/>
+  <text x="100" y="59" font-family="monospace" font-size="5.5" fill="#69f0ae" text-anchor="middle">FLIPPER ZERO</text>
+  <!-- Buttons -->
+  <circle cx="75" cy="80" r="7" fill="#111" stroke="#ff7043" stroke-width="1"/>
+  <circle cx="100" cy="80" r="7" fill="#111" stroke="#ff7043" stroke-width="1"/>
+  <circle cx="125" cy="80" r="7" fill="#111" stroke="#ff7043" stroke-width="1"/>
+  <text x="75" y="83" font-family="monospace" font-size="7" fill="#ff7043" text-anchor="middle">◀</text>
+  <text x="100" y="83" font-family="monospace" font-size="7" fill="#ff7043" text-anchor="middle">●</text>
+  <text x="125" y="83" font-family="monospace" font-size="7" fill="#ff7043" text-anchor="middle">▶</text>
+  <!-- IR / RF signal indicators -->
+  <text x="58" y="104" font-family="monospace" font-size="5" fill="#546e7a">RF·NFC·RFID·IR·BLE</text>
+  <text x="100" y="115" font-family="monospace" font-size="7.5" fill="#ff7043" text-anchor="middle">Flipper Zero — ~$169</text>
+</svg></div>
+          <div class="device-img-label">Flipper Zero</div>
+          <div class="device-img-sub">Sub-GHz · NFC · RFID · IR — ~$169</div>
+        </div>
+        <div class="device-img-card">
+          <div class="svg-device-img"><svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="120" fill="#050810"/>
+  <!-- PCB board -->
+  <rect x="20" y="20" width="160" height="80" rx="3" fill="#0a1500" stroke="#1a3000" stroke-width="1.5"/>
+  <!-- Mounting holes -->
+  <circle cx="28" cy="28" r="3" fill="none" stroke="#2a5000" stroke-width="1"/>
+  <circle cx="172" cy="28" r="3" fill="none" stroke="#2a5000" stroke-width="1"/>
+  <circle cx="28" cy="92" r="3" fill="none" stroke="#2a5000" stroke-width="1"/>
+  <circle cx="172" cy="92" r="3" fill="none" stroke="#2a5000" stroke-width="1"/>
+  <!-- Main RFIC chip -->
+  <rect x="65" y="30" width="45" height="45" rx="2" fill="#111" stroke="#2a4a00" stroke-width="1"/>
+  <text x="87" y="50" font-family="monospace" font-size="5.5" fill="#69f0ae" text-anchor="middle">MAX2837</text>
+  <text x="87" y="60" font-family="monospace" font-size="5" fill="#546e7a" text-anchor="middle">RF Transceiver</text>
+  <!-- CPLD chip -->
+  <rect x="120" y="35" width="30" height="22" rx="1" fill="#0d0d1a" stroke="#2a2a4a" stroke-width="1"/>
+  <text x="135" y="48" font-family="monospace" font-size="5" fill="#4fc3f7" text-anchor="middle">CPLD</text>
+  <!-- USB port -->
+  <rect x="20" y="50" width="18" height="12" rx="1" fill="#2a2a2a" stroke="#444" stroke-width="1"/>
+  <text x="29" y="59" font-family="monospace" font-size="4.5" fill="#444" text-anchor="middle">USB</text>
+  <!-- SMA connectors -->
+  <circle cx="162" cy="40" r="6" fill="#333" stroke="#666" stroke-width="1"/>
+  <circle cx="162" cy="40" r="2.5" fill="#888"/>
+  <circle cx="162" cy="70" r="6" fill="#333" stroke="#666" stroke-width="1"/>
+  <circle cx="162" cy="70" r="2.5" fill="#888"/>
+  <text x="173" y="43" font-family="monospace" font-size="5" fill="#69f0ae">TX</text>
+  <text x="173" y="73" font-family="monospace" font-size="5" fill="#4fc3f7">RX</text>
+  <!-- Label -->
+  <text x="50" y="82" font-family="monospace" font-size="7" fill="#69f0ae">HackRF One</text>
+  <text x="50" y="91" font-family="monospace" font-size="5.5" fill="#546e7a">1 MHz — 6 GHz TX/RX</text>
+  <text x="100" y="110" font-family="monospace" font-size="7.5" fill="#69f0ae" text-anchor="middle">HackRF One — clone ~$50</text>
+</svg></div>
+          <div class="device-img-label">HackRF One</div>
+          <div class="device-img-sub">TX + RX SDR — clone ~$50</div>
         </div>
       </div>
 
